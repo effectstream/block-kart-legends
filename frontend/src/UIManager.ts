@@ -228,10 +228,9 @@ export class UIManager {
         }
     }
 
-    public updateSpeed(speed: number) {
-        // Convert pseudo-speed (0.05 - 0.15 progress/sec) to something readable like km/h
-        // Let's say 0.1 progress/sec is 100 km/h approx
-        const displaySpeed = Math.round(speed * 1000);
+    public updateSpeed(speedKmh: number) {
+        // Speed is now in real KM/H (converted from progress/sec by GameSimulator)
+        const displaySpeed = Math.round(speedKmh);
         this.speedDisplay.innerText = `${displaySpeed} km/h`;
     }
 

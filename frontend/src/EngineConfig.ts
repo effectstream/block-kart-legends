@@ -1,46 +1,59 @@
 export interface PhysicsConfig {
-    // Speed
-    minMaxSpeed: number; // 0.05
-    maxMaxSpeed: number; // 0.25
-
-    // Acceleration
-    baseAccel: number; // 0.2
-    accelPerStat: number; // 1.0
-    decelMult: number; // 2.0 (relative to accel)
-
-    // Handling / Cornering
-    handlingCurveThreshold: number; // 0.1
-    handlingMaxFactor: number; // 12 (divisor)
-    brakingStrengthMult: number; // 16.0
-    minCorneringSpeedFactor: number; // 0.2
-
-    // Grip (New: Grip affects cornering speed retention)
-    gripCorneringEffect: number; // 0.0 - 1.0 effect
-
-    // Mass (New: Mass affects momentum/coasting)
-    massDecelReduction: number; // 0.0 - 0.5 reduction in deceleration per stat point
-
-    // Boost
-    boostGripBonusBase: number; // 0.6
-    boostGripBonusPerStat: number; // 0.9 (per 10 stats)
-
-    // Resistance
-    massResistanceDivisor: number; // 20
+    minMaxSpeed: number;
+    maxMaxSpeed: number;
+    baseAccel: number;
+    accelPerStat: number;
+    decelMult: number;
+    handlingCurveThreshold: number;
+    handlingMaxFactor: number;
+    brakingStrengthMult: number;
+    minCorneringSpeedFactor: number;
+    gripCorneringEffect: number;
+    massDecelReduction: number;
+    boostGripBonusBase: number;
+    boostGripBonusPerStat: number;
+    massResistanceDivisor: number;
+    boostAccelMultiplier: number;
+    mushroomBaseDuration: number;
+    mushroomBaseMagnitude: number;
+    starBaseDuration: number;
+    starMagnitude: number;
+    redShellBaseDuration: number;
+    redShellMagnitude: number;
+    lightningBaseDuration: number;
+    lightningMagnitude: number;
+    bananaHitDistance: number;
+    bananaBaseDuration: number;
+    bananaMagnitude: number;
+    negativeEffectRankScaling: number;
 }
 
 export const DEFAULT_PHYSICS_CONFIG: PhysicsConfig = {
-    minMaxSpeed: 0.05461780422431757,
-    maxMaxSpeed: 0.25683147824255714,
-    baseAccel: 0.20559022654110695,
-    accelPerStat: 1.0674473571133247,
-    decelMult: 1.9129059011273872,
-    handlingCurveThreshold: 0.0926527494075724,
-    handlingMaxFactor: 12,
-    brakingStrengthMult: 16,
-    minCorneringSpeedFactor: 0.20227278635508059,
-    gripCorneringEffect: 0.09723810051943599,
-    massDecelReduction: 0.05113500680114807,
-    boostGripBonusBase: 0.6,
-    boostGripBonusPerStat: 0.9,
-    massResistanceDivisor: 20
-};
+    "minMaxSpeed": 0.0563513845640329,
+    "maxMaxSpeed": 0.2724976577578908,
+    "baseAccel": 0.1913765562021367,
+    "accelPerStat": 0.9875714892048394,
+    "decelMult": 1.693052331419472,
+    "handlingCurveThreshold": 0.09173255261872854,
+    "handlingMaxFactor": 12,
+    "brakingStrengthMult": 14.710291196918213,
+    "minCorneringSpeedFactor": 0.22152368202728864,
+    "gripCorneringEffect": 0.08811343627515372,
+    "massDecelReduction": 0.04782069395727412,
+    "boostGripBonusBase": 0.6,
+    "boostGripBonusPerStat": 0.9,
+    "massResistanceDivisor": 20.280541034570195,
+    boostAccelMultiplier: 2.0517478029311733,
+    mushroomBaseDuration: 5,
+    mushroomBaseMagnitude: 0.5845675534723026,
+    starBaseDuration: 5,
+    starMagnitude: 0.2120743430174911,
+    redShellBaseDuration: 2.043378119811967,
+    redShellMagnitude: 1,
+    lightningBaseDuration: 3.6442397663879635,
+    lightningMagnitude: 0.37789652228856774,
+    bananaHitDistance: 0.10175864777008577,
+    bananaBaseDuration: 1.6085460517742507,
+    bananaMagnitude: 1,
+    negativeEffectRankScaling: 0.8731424131476988
+  };

@@ -63,8 +63,9 @@ export class SimCar {
     public lastCurvature: number = 0;
     private trackConfig: TrackConfig;
     private physicsConfig: PhysicsConfig;
+    private maxSpeedProgressPerSecond: number;
 
-    constructor(config: CarConfig, trackConfig?: TrackConfig, physicsConfig?: PhysicsConfig) {
+    constructor(config: CarConfig, trackConfig?: TrackConfig, physicsConfig?: PhysicsConfig, maxSpeedProgressPerSecond?: number) {
         this.id = config.id;
         this.stats = config.stats;
         this.progress = config.startProgress || 0;
@@ -81,6 +82,7 @@ export class SimCar {
              grassColor: 0x006266,
              skyColor: 0x87CEEB
         };
+        this.maxSpeedProgressPerSecond = maxSpeedProgressPerSecond || Infinity;
     }
 
     addEffect(effect: ActiveEffect) {
@@ -132,24 +134,44 @@ export class SimCar {
         // Apply Terrain Speed Modifier to Max Speed
         const terrainModifier = this.trackConfig.speedModifier;
         
-        let targetSpeed = (minMaxSpeed + (statSpeed / 2) * (maxMaxSpeed - minMaxSpeed)) * terrainModifier;
+        // Grip factor has dramatic effect: <5 can't win, 5=~5% win, >5 always wins
+        // Apply grip as a multiplier on max speed: <5 severely limits, 5=normal, >5 boosts significantly
+        let gripMultiplier = 1.0;
+        if (statGrip < 5) {
+            // <5: Severely limits speed (can't win)
+            // 1->0.3x, 4->0.7x
+            gripMultiplier = 0.3 + ((statGrip - 1) / 3) * 0.4;
+        } else if (statGrip === 5) {
+            // 5: Standard (normal performance, ~5% win rate in balanced races)
+            gripMultiplier = 1.0;
+        } else {
+            // >5: Significant boost (always wins)
+            // 6->1.3x, 10->2.0x
+            gripMultiplier = 1.0 + ((statGrip - 5) / 5) * 1.0;
+        }
+        
+        // Calculate base target speed from stats
+        const baseTargetSpeed = (minMaxSpeed + (statSpeed / 2) * (maxMaxSpeed - minMaxSpeed)) * terrainModifier * gripMultiplier;
 
-        // Apply SpeedBoost
+        // Apply SpeedBoost (multiplicative modifier to base speed)
         const boost = this.activeEffects.find(e => e.type === 'SpeedBoost');
+        let speedMultiplier = 1.0;
         if (boost) {
             // Grip factor increases boost effectiveness (10% per point over 5)
             // Grip 1 -> 0.6x boost effect
             // Grip 5 -> 1.0x boost effect
             // Grip 10 -> 1.5x boost effect
             const gripBonus = this.physicsConfig.boostGripBonusBase + (statGrip / 10) * this.physicsConfig.boostGripBonusPerStat;
-            targetSpeed *= (1 + boost.magnitude * gripBonus);
+            speedMultiplier = 1 + boost.magnitude * gripBonus;
         }
-
-        // Apply Shrink (Slow)
+        
+        // Apply Shrink (Slow) - reduces speed multiplier
         const shrink = this.activeEffects.find(e => e.type === 'Shrink');
         if (shrink) {
-            targetSpeed *= (1 - shrink.magnitude);
+            speedMultiplier *= (1 - shrink.magnitude);
         }
+        
+        let targetSpeed = baseTargetSpeed * speedMultiplier;
         
         // Invincible increases speed slightly too
         const star = this.activeEffects.find(e => e.type === 'Invincible');
@@ -184,10 +206,19 @@ export class SimCar {
 
         // accel_curve 1-10 -> factor
         // Formula: current_speed += (max_velocity - current_speed) * acceleration_factor * delta_time
-        // acceleration_factor needs to be tuned. Let's say 0.5 to 2.0
-        let accelFactor = this.physicsConfig.baseAccel + (statAccel / 10) * this.physicsConfig.accelPerStat;
+        // 5 is standard, <5 is worse, >5 is better
+        // Map: 1->0.5x, 5->1.0x, 10->2.0x
+        let accelMultiplier: number;
+        if (statAccel <= 5) {
+            // 1->0.5x, 5->1.0x (linear interpolation)
+            accelMultiplier = 0.5 + ((statAccel - 1) / 4) * 0.5;
+        } else {
+            // 5->1.0x, 10->2.0x (linear interpolation)
+            accelMultiplier = 1.0 + ((statAccel - 5) / 5) * 1.0;
+        }
+        let accelFactor = this.physicsConfig.baseAccel * accelMultiplier;
         
-        if (boost) accelFactor *= 2.0;
+        if (boost) accelFactor *= this.physicsConfig.boostAccelMultiplier;
 
         // Deceleration is faster than acceleration (braking)
         // Mass reduces deceleration (momentum/coasting)
@@ -204,6 +235,9 @@ export class SimCar {
         } else {
              this.currentSpeed += (targetSpeed - this.currentSpeed) * accelFactor * deltaSeconds;
         }
+        
+        // Cap speed at 180 KM/H
+        this.currentSpeed = Math.min(this.currentSpeed, this.maxSpeedProgressPerSecond);
         
         // Apply movement
         this.progress += this.currentSpeed * deltaSeconds;
@@ -224,6 +258,8 @@ export class GameSimulator {
     public snapshots: GameSnapshot[] = [];
     private trackConfig: TrackConfig | undefined;
     private physicsConfig: PhysicsConfig;
+    private maxSpeedProgressPerSecond: number; // Capped at 180 KM/H
+    private trackLength: number; // Cached track length in meters
 
     constructor(trackPoints: Vector3[], laps: number, trackConfig?: TrackConfig, physicsConfig?: PhysicsConfig) {
         this.curve = new CatmullRomCurve3(trackPoints);
@@ -232,6 +268,39 @@ export class GameSimulator {
         this.totalLaps = laps;
         this.trackConfig = trackConfig;
         this.physicsConfig = physicsConfig || DEFAULT_PHYSICS_CONFIG;
+        
+        // Calculate track length and convert 200 KM/H to progress per second
+        this.trackLength = this.calculateTrackLength();
+        const maxSpeedKmh = 200;
+        const maxSpeedMs = (maxSpeedKmh * 1000) / 3600; // Convert KM/H to m/s
+        this.maxSpeedProgressPerSecond = maxSpeedMs / this.trackLength; // Convert to progress per second
+    }
+    
+    private calculateTrackLength(): number {
+        // Sample the curve at high resolution to calculate approximate length
+        const samples = 1000;
+        let length = 0;
+        let prevPoint = this.curve.getPointAt(0);
+        
+        for (let i = 1; i <= samples; i++) {
+            const t = i / samples;
+            const point = this.curve.getPointAt(t);
+            length += prevPoint.distanceTo(point);
+            prevPoint = point;
+        }
+        
+        return length; // Length in meters (assuming Three.js units are meters)
+    }
+    
+    /**
+     * Converts speed from progress per second to real KM/H
+     * @param progressPerSecond Speed in progress per second
+     * @returns Speed in KM/H
+     */
+    public convertSpeedToKmh(progressPerSecond: number): number {
+        const metersPerSecond = progressPerSecond * this.trackLength;
+        const kmh = metersPerSecond * 3.6; // Convert m/s to km/h
+        return kmh;
     }
     
     // ... (rest of class methods, make sure to pass physicsConfig to SimCar in start())
@@ -257,7 +326,7 @@ export class GameSimulator {
     }
 
     public start(carConfigs: CarConfig[]) {
-        this.cars = carConfigs.map(c => new SimCar(c, this.trackConfig, this.physicsConfig));
+        this.cars = carConfigs.map(c => new SimCar(c, this.trackConfig, this.physicsConfig, this.maxSpeedProgressPerSecond));
         this.time = 0;
         this.results = [];
         this.snapshots = [];
@@ -291,15 +360,14 @@ export class GameSimulator {
         switch (item) {
             case 'Mushroom':
                 // Positive: Stronger for lower ranks (higher rankIndex)
-                // Base: 5s, 0.5 mag. Max: 10s, 1.0 mag.
-                const boostDuration = 5.0 * (1 + rankFactor); 
-                const boostMag = 0.5 * (1 + rankFactor);
+                const boostDuration = this.physicsConfig.mushroomBaseDuration * (1 + rankFactor); 
+                const boostMag = this.physicsConfig.mushroomBaseMagnitude * (1 + rankFactor);
                 car.addEffect({ type: 'SpeedBoost', duration: boostDuration, magnitude: boostMag, label: 'Boost' });
                 break;
             case 'Star':
                 // Positive: Longer for lower ranks
-                const starDuration = 5.0 * (1 + rankFactor);
-                car.addEffect({ type: 'Invincible', duration: starDuration, magnitude: 0.2, label: 'Star' });
+                const starDuration = this.physicsConfig.starBaseDuration * (1 + rankFactor);
+                car.addEffect({ type: 'Invincible', duration: starDuration, magnitude: this.physicsConfig.starMagnitude, label: 'Star' });
                 // Also clears negatives
                 car.activeEffects = car.activeEffects.filter(e => !['Stun', 'Shrink'].includes(e.type));
                 break;
@@ -310,9 +378,8 @@ export class GameSimulator {
                     const targetRank = this.getCarRank(target.id);
                     const targetRankFactor = totalCars > 1 ? targetRank / (totalCars - 1) : 0;
                     // Negative: Stronger against leaders (lower rankIndex)
-                    // 1st place (0) -> 100% effect. Last place (1) -> 20% effect.
-                    const shellDuration = 2.0 * (1 - targetRankFactor * 0.8);
-                    target.addEffect({ type: 'Stun', duration: shellDuration, magnitude: 1.0, label: 'Hit' });
+                    const shellDuration = this.physicsConfig.redShellBaseDuration * (1 - targetRankFactor * this.physicsConfig.negativeEffectRankScaling);
+                    target.addEffect({ type: 'Stun', duration: shellDuration, magnitude: this.physicsConfig.redShellMagnitude, label: 'Hit' });
                 }
                 break;
             case 'Lightning':
@@ -322,8 +389,8 @@ export class GameSimulator {
                          const cRank = this.getCarRank(c.id);
                          const cRankFactor = totalCars > 1 ? cRank / (totalCars - 1) : 0;
                          // Negative: Stronger against leaders
-                         const shockDuration = 4.0 * (1 - cRankFactor * 0.8);
-                         c.addEffect({ type: 'Shrink', duration: shockDuration, magnitude: 0.4, label: 'Shrunk' });
+                         const shockDuration = this.physicsConfig.lightningBaseDuration * (1 - cRankFactor * this.physicsConfig.negativeEffectRankScaling);
+                         c.addEffect({ type: 'Shrink', duration: shockDuration, magnitude: this.physicsConfig.lightningMagnitude, label: 'Shrunk' });
                     }
                 });
                 break;
@@ -363,14 +430,14 @@ export class GameSimulator {
              // Distance behind
              let dist = (source.lap + source.progress) - (other.lap + other.progress);
              
-             // If car is within 0.1 progress units behind (approx 10% of track)
-             if (dist > 0 && dist < 0.1) {
+             // If car is within hit distance threshold
+             if (dist > 0 && dist < this.physicsConfig.bananaHitDistance) {
                   // Hit!
                   const rank = this.getCarRank(other.id);
                   const rankFactor = totalCars > 1 ? rank / (totalCars - 1) : 0;
                   // Negative: Stronger against leaders
-                  const duration = 1.5 * (1 - rankFactor * 0.8);
-                  other.addEffect({ type: 'Stun', duration: duration, magnitude: 1.0, label: 'Slip' });
+                  const duration = this.physicsConfig.bananaBaseDuration * (1 - rankFactor * this.physicsConfig.negativeEffectRankScaling);
+                  other.addEffect({ type: 'Stun', duration: duration, magnitude: this.physicsConfig.bananaMagnitude, label: 'Slip' });
              }
          });
     }

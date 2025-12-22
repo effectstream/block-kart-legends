@@ -43,6 +43,10 @@ export class GameManager {
     
     private keysPressed = new Set<string>();
     private clouds: THREE.Group[] = [];
+    
+    // Camera trailing system for smooth curves
+    private trailingPosition: THREE.Vector3 = new THREE.Vector3();
+    private trailingDirection: THREE.Vector3 = new THREE.Vector3(0, 0, 1);
 
     constructor(containerId: string, seed?: number) {
         const container = document.getElementById(containerId);
@@ -77,7 +81,7 @@ export class GameManager {
 
         // Camera
         this.camera = new THREE.PerspectiveCamera(60, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
-        this.camera.position.set(0, 10, 10);
+        this.camera.position.set(0, 20, 20);
         this.camera.lookAt(0, 0, 0);
 
         // Renderer
@@ -315,6 +319,10 @@ export class GameManager {
         const playerCarId = 'You';
         this.playerCar = new Car(this.scene, this.circuit, playerCarId, playerConfig.stats, 0xff0000, true);
         this.cars.push(this.playerCar);
+        
+        // Reset trailing position for camera lag system (will be initialized on first camera update)
+        this.trailingPosition.set(0, 0, 0);
+        this.trailingDirection.set(0, 0, 1);
         
         carConfigs.push({
             id: playerCarId,
@@ -590,26 +598,81 @@ export class GameManager {
         });
     }
 
-    private updateCamera() {
+    private updateCamera(deltaTime: number) {
         if (this.playerCar) {
             const carPos = this.playerCar.mesh.position.clone();
             const carDir = new THREE.Vector3();
             this.playerCar.mesh.getWorldDirection(carDir);
 
-            // Camera behind and above
-            const offset = carDir.clone().multiplyScalar(-8).add(new THREE.Vector3(0, 5, 0));
-            const targetPos = carPos.clone().add(offset);
+            // Initialize trailing position if not set
+            if (this.trailingPosition.lengthSq() === 0) {
+                this.trailingPosition.copy(carPos);
+                this.trailingDirection.copy(carDir);
+            }
+
+            // Update trailing position with lag - follows car position smoothly
+            const trailingSpeed = 4.0; // units per second - how fast trailing position follows car (reduced for more inertia)
+            const trailingDirection = new THREE.Vector3().subVectors(carPos, this.trailingPosition);
+            const trailingDistance = trailingDirection.length();
             
-            this.camera.position.lerp(targetPos, 0.05);
+            if (trailingDistance > 0.01) {
+                const moveDistance = Math.min(trailingDistance, trailingSpeed * deltaTime);
+                trailingDirection.normalize().multiplyScalar(moveDistance);
+                this.trailingPosition.add(trailingDirection);
+            } else {
+                this.trailingPosition.copy(carPos);
+            }
+
+            // Update trailing direction with lag - rotates toward car direction smoothly
+            const maxDirectionSpeed = 0.7; // radians per second (reduced for more inertia on sharp curves)
+            const dot = this.trailingDirection.dot(carDir);
+            const angle = Math.acos(Math.max(-1, Math.min(1, dot)));
             
-            // Look ahead of the car
-            const lookAtTarget = carPos.clone().add(carDir.multiplyScalar(5));
+            if (angle > 0.001) {
+                const t = Math.min(1.0, (maxDirectionSpeed * deltaTime) / angle);
+                this.trailingDirection.lerp(carDir, t).normalize();
+            } else {
+                this.trailingDirection.copy(carDir);
+            }
+
+            // Camera behind and above the trailing position
+            const offset = this.trailingDirection.clone().multiplyScalar(-12).add(new THREE.Vector3(0, 8, 0));
+            const targetPos = this.trailingPosition.clone().add(offset);
             
+            // Smooth camera position movement with speed limit
+            const maxPositionSpeed = 6.0; // units per second (reduced for more inertia)
+            const cameraDirection = new THREE.Vector3().subVectors(targetPos, this.camera.position);
+            const cameraDistance = cameraDirection.length();
+            
+            if (cameraDistance > 0.01) {
+                const moveDistance = Math.min(cameraDistance, maxPositionSpeed * deltaTime);
+                cameraDirection.normalize().multiplyScalar(moveDistance);
+                this.camera.position.add(cameraDirection);
+            } else {
+                this.camera.position.copy(targetPos);
+            }
+            
+            // Look ahead of the trailing position (but still reference actual car for look target)
+            const lookAtTarget = this.trailingPosition.clone().add(this.trailingDirection.clone().multiplyScalar(5));
+            
+            // Smooth rotation with angular speed limit
             const dummyCam = this.camera.clone();
             dummyCam.position.copy(this.camera.position);
             dummyCam.lookAt(lookAtTarget);
             
-            this.camera.quaternion.slerp(dummyCam.quaternion, 0.05);
+            const targetQuaternion = dummyCam.quaternion.clone();
+            const maxAngularSpeed = 0.1; // radians per second (reduced for more rotational inertia)
+            
+            // Calculate the angle between current and target rotation
+            const rotDot = this.camera.quaternion.dot(targetQuaternion);
+            const rotAngle = Math.acos(Math.abs(rotDot) * 2 - 1);
+            
+            if (rotAngle > 0.01) {
+                const t = Math.min(1.0, (maxAngularSpeed * deltaTime) / rotAngle);
+                this.camera.quaternion.slerp(targetQuaternion, t);
+            } else {
+                this.camera.quaternion.copy(targetQuaternion);
+            }
         }
     }
 
@@ -646,8 +709,9 @@ export class GameManager {
         const playerSimCar = simCars.find(c => c.isPlayer);
         
         if (playerSimCar) {
-            // Speed
-            this.uiManager.updateSpeed(playerSimCar.currentSpeed);
+            // Speed - convert from progress/sec to real KM/H
+            const speedKmh = this.simulator.convertSpeedToKmh(playerSimCar.currentSpeed);
+            this.uiManager.updateSpeed(speedKmh);
             
             // Position
             const playerRank = leaderboardData.find(d => d.name === 'You')?.rank || 0;
@@ -734,7 +798,7 @@ export class GameManager {
 
         if (this.isRunning) {
             this.updatePhysics(deltaTime);
-            this.updateCamera();
+            this.updateCamera(deltaTime);
             this.updateUI();
             // this.updateHover();
         } else {
