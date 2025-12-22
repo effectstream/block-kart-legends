@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Block Kart Legends</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,700;1,400&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css">
+  </head>
+  <body>
+    <div id="app-container">
+      <header id="game-header">
+        <h1>Block Kart Legends</h1>
+        <div style="margin-left: auto; display: flex; gap: 10px;">
+            <button id="btn-set-name" class="wallet-btn" style="display: none; position: static; transform: none;">SET NAME</button>
+            <button id="connect-wallet-btn" class="wallet-btn" style="position: static; transform: none;">Connect Wallet</button>
+        </div>
+      </header>
+      
+      <!-- Set Name Modal -->
+      <div id="set-name-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="close-set-name-modal" class="close">&times;</span>
+            <h2>Set Player Name</h2>
+            <div style="margin: 20px 0;">
+                <input type="text" id="input-player-name" placeholder="Enter name..." maxlength="15" style="width: 100%; padding: 10px; font-size: 1.2em; border-radius: 4px; border: 1px solid #555; background: #333; color: white;">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="btn-cancel-set-name" class="primary-btn" style="margin: 0; font-size: 0.9em; background: #555; border: 1px solid #777; box-shadow: none;">Cancel</button>
+                <button id="btn-confirm-set-name" class="primary-btn" style="margin: 0; font-size: 0.9em;">Save Name</button>
+            </div>
+        </div>
+      </div>
+      
+      <!-- Wallet Modal -->
+      <div id="wallet-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <span id="close-modal" class="close">&times;</span>
+          <h2>Connect Wallet</h2>
+          <div id="loading-wallets" style="display: none;">Loading wallets...</div>
+          <ul id="wallet-list" class="wallet-list"></ul>
+          <div id="local-wallet-info"></div>
+        </div>
+      </div>
+      
+      <div id="content-wrapper">
+        <aside id="sidebar">
+          <h3 id="sidebar-title">Leaderboard</h3>
+          <div id="leaderboard-list">
+            <!-- Leaderboard items -->
+            <div class="leaderboard-item">Waiting for race...</div>
+          </div>
+        </aside>
+
+        <main id="game-area">
+          <!-- Screens will be injected/toggled here -->
+          <div id="screens-layer">
+            <div id="start-screen" class="screen active">
+              <button id="start-btn" class="primary-btn">START GAME</button>
+            </div>
+            
+            <div id="setup-screen" class="screen hidden">
+              <h2>Setup Your Car</h2>
+              <div class="budget-display">Points Remaining: <span id="points-remaining">0</span>/25</div>
+              
+              <div class="stats-grid">
+                <div class="stats-control">
+                  <label>Speed: <input type="range" min="1" max="10" value="5" id="stat-speed" /> <span id="val-speed">5</span></label>
+                </div>
+                <div class="stats-control">
+                  <label>Accel: <input type="range" min="1" max="10" value="5" id="stat-accel" /> <span id="val-accel">5</span></label>
+                </div>
+                <div class="stats-control">
+                  <label>Weight: <input type="range" min="1" max="10" value="5" id="stat-weight" /> <span id="val-weight">5</span></label>
+                </div>
+                <div class="stats-control">
+                  <label>Handling: <input type="range" min="1" max="10" value="5" id="stat-handling" /> <span id="val-handling">5</span></label>
+                </div>
+                <div class="stats-control">
+                  <label>Traction: <input type="range" min="1" max="10" value="5" id="stat-traction" /> <span id="val-traction">5</span></label>
+                </div>
+              </div>
+              
+              <div class="items-section">
+                <h3>Select Items (Drag to Slots)</h3>
+                
+                <div id="available-items-container" class="items-pool">
+                  <!-- Random 3 items will appear here -->
+                </div>
+
+                <div class="timeline-container">
+                    <h4>Race Strategy</h4>
+                    <div id="slots-container" class="slots-row">
+                        <!-- 10 slots will be generated here -->
+                    </div>
+                </div>
+              </div>
+
+              <button id="play-btn" class="primary-btn">PLAY</button>
+            </div>
+
+            <div id="results-screen" class="screen hidden">
+              <h2>Race Results</h2>
+              <div id="results-content"></div>
+              <button id="restart-btn" class="primary-btn">MAIN MENU</button>
+            </div>
+          </div>
+          
+          <div id="game-canvas-container"></div>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
