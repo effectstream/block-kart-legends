@@ -1,0 +1,12 @@
+{
+  "name": "@kart-legends/game-simulation",
+  "version": "0.3.0",
+  "license": "MIT",
+  "exports": "./src/mod.ts",
+  "imports": {
+    "three": "npm:three@^0.182.0"
+  },
+  "tasks": {
+    "dryRun": "DRY_RUN=true deno run -A ./src/runSimulation.ts"
+  }
+}

@@ -1,0 +1,11 @@
+pragma language_version >= 0.16.0;
+
+import CompactStandardLibrary;
+
+constructor() {
+}
+
+export ledger payload: Opaque<"string">;
+export circuit storeValue(_payload: Opaque<"string">): [] {
+  payload = disclose(_payload);
+}
