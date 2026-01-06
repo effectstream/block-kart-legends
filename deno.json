@@ -1,0 +1,32 @@
+{
+  "workspace": [
+    "./packages/client/**/*",
+    "./packages/shared/**/*"
+  ],
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "build:evm": "deno task -f @kart-legends/evm-contracts build:mod",
+    "build:midnight": "deno task -r compact",
+    "dev": "deno task -f @kart-legends/node dev",
+    "testnet": "deno task -f @kart-legends/node testnet",
+    "check": "deno task -f @kart-legends/node check"
+  },
+  "imports": {
+    "@paimaexample/tui": "jsr:@paimaexample/tui@0.3.126",
+    "@paimaexample/midnight-contracts": "jsr:@paimaexample/midnight-contracts@0.3.126",
+    "@paimaexample/evm-contracts": "jsr:@paimaexample/evm-contracts@0.3.126",
+    "@std/path": "jsr:@std/path@^1.1.3"
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-this-alias",
+        "require-yield",
+        "no-explicit-any",
+        "ban-types",
+        "no-unused-vars",
+        "no-slow-types"
+      ]
+    }
+  }
+}

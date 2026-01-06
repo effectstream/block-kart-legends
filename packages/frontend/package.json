@@ -1,0 +1,29 @@
+{
+  "name": "block-kart-legends",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "serve": "npx http-server ./dist"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-glsl": "^1.5.5",
+    "vite-plugin-node-polyfills": "^0.24.0"
+  },
+  "dependencies": {
+    "@paimaexample/wallets": "^0.3.125",
+    "@thirdweb-dev/chains": "^0.1.120",
+    "@thirdweb-dev/wallets": "^2.5.39",
+    "@tweenjs/tween.js": "^25.0.0",
+    "@types/three": "^0.182.0",
+    "ethers": "^5.8.0",
+    "three": "^0.182.0",
+    "viem": "^2.42.1"
+  }
+}

@@ -1,0 +1,5 @@
+dist/
+node_modules/
+balance_results.csv
+stats/
+src/_run_simulation.ts
