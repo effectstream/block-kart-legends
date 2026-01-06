@@ -1,4 +1,4 @@
-# Block Kart Legends
+# Block Kart Legends - On Chain Game Template
 
 https://github.com/user-attachments/assets/146605ca-03fb-496d-ba15-0c029c7565a6
 
