@@ -1,6 +1,9 @@
 # Block Kart Legends
 
-<img width="100%" alt="block-kart-legends" src="https://github.com/user-attachments/assets/202bb931-b077-4fc9-a9ac-8338fc0e9508" />
+https://github.com/user-attachments/assets/146605ca-03fb-496d-ba15-0c029c7565a6
+
+
+<!-- <img width="100%" alt="block-kart-legends" src="https://github.com/user-attachments/assets/202bb931-b077-4fc9-a9ac-8338fc0e9508" /> -->
 
 Block Kart Legends is a typescript *on-chain* racing simulator.  
 And serves as a template for building on-chain games.
