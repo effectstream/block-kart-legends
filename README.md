@@ -18,9 +18,6 @@ To start you must have some dependencies installed.
 
 # Quick Start
 ```sh
-# Check for external dependencies
-./check.sh
-
 # Install packages
 deno install --allow-scripts && ./patch.sh
 
