@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
 __compactRuntime.checkRuntimeVersion('0.11.0');
 

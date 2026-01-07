@@ -58,7 +58,7 @@ export const config = new ConfigBuilder()
         type: ConfigNetworkType.MIDNIGHT,
         genesisHash:
           "0x0000000000000000000000000000000000000000000000000000000000000001",
-        networkId: 0,
+        networkId: 'undeployed',
         nodeUrl: "http://127.0.0.1:9944",
       })
   )
@@ -93,8 +93,8 @@ export const config = new ConfigBuilder()
           type: ConfigSyncProtocolType.MIDNIGHT_PARALLEL,
           startBlockHeight: 1,
           pollingInterval: 1000,
-          indexer: "http://127.0.0.1:8088/api/v1/graphql",
-          indexerWs: "ws://127.0.0.1:8088/api/v1/graphql/ws",
+          indexer: "http://127.0.0.1:8088/api/v3/graphql",
+          indexerWs: "ws://127.0.0.1:8088/api/v3/graphql/ws",
           delayMs: 30000,
         })
       )

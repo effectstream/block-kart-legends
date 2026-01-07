@@ -25,8 +25,8 @@
         }
       },
       "remappings": [
-        "npm/@paimaexample/evm-contracts@0.3.124/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.1.0/",
-        "project/:@paimaexample/evm-contracts/=npm/@paimaexample/evm-contracts@0.3.124/"
+        "npm/@paimaexample/evm-contracts@0.3.127/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.1.0/",
+        "project/:@paimaexample/evm-contracts/=npm/@paimaexample/evm-contracts@0.3.127/"
       ]
     },
     "sources": {
@@ -36,7 +36,7 @@
       "npm/@openzeppelin/contracts@5.1.0/utils/Errors.sol": {
         "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/Errors.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Collection of common custom errors used in multiple contracts\n *\n * IMPORTANT: Backwards compatibility is not guaranteed in future versions of the library.\n * It is recommended to avoid relying on the error API for critical functionality.\n *\n * _Available since v5.1._\n */\nlibrary Errors {\n    /**\n     * @dev The ETH balance of the account is not enough to perform the operation.\n     */\n    error InsufficientBalance(uint256 balance, uint256 needed);\n\n    /**\n     * @dev A call to an address target failed. The target may have reverted.\n     */\n    error FailedCall();\n\n    /**\n     * @dev The deployment failed.\n     */\n    error FailedDeployment();\n\n    /**\n     * @dev A necessary precompile is missing.\n     */\n    error MissingPrecompile(address);\n}\n"
       },
-      "npm/@paimaexample/evm-contracts@0.3.124/src/contracts/PaimaL2Contract.sol": {
+      "npm/@paimaexample/evm-contracts@0.3.127/src/contracts/PaimaL2Contract.sol": {
         "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport \"@openzeppelin/contracts/utils/Address.sol\";\n\n/// @dev The main L2 contract for a Paima L2.\ncontract PaimaL2Contract {\n    using Address for address payable;\n\n    /// @dev Emitted when `paimaSubmitGameInput` function is called with `data`.\n    /// `userAddress` is the transaction sender and `value` is the transaction value.\n    event PaimaGameInteraction(address indexed userAddress, bytes data, uint256 value);\n\n    /// @dev Contract owner.\n    address public owner;\n    /// @dev Amount in wei that is required to be paid when calling `paimaSubmitGameInput`.\n    uint256 public fee; // in wei\n\n    /// @dev Sets the contract owner to `_owner` and payment fee to `_fee`.\n    constructor(address _owner, uint256 _fee) {\n        owner = _owner;\n        fee = _fee;\n    }\n\n    /// @dev Emits the `PaimaGameInteraction` event, logging the `msg.sender`, `data`, and `msg.value`.\n    /// Revert if `msg.value` is less than set `fee`.\n    function paimaSubmitGameInput(bytes calldata data) public payable {\n        require(msg.value >= fee, \"Sufficient funds required to submit game input\");\n        emit PaimaGameInteraction(msg.sender, data, msg.value);\n    }\n\n    /// @dev Withdraws the contract balance to the `owner`.\n    /// Callable only by the contract owner.\n    function withdrawFunds() public {\n        require(msg.sender == owner, \"Only owner can withdraw funds\");\n        address payable to = payable(owner);\n        uint256 balance = address(this).balance;\n        to.sendValue(balance);\n    }\n\n    /// @dev Sets the `newOwner` as the contract owner.\n    /// Callable only by the contract owner.\n    function setOwner(address newOwner) public {\n        require(msg.sender == owner, \"Only owner can change owner\");\n        owner = newOwner;\n    }\n\n    /// @dev Sets the `newFee` as the required payment fee.\n    /// Callable only by the contract owner.\n    function setFee(uint256 newFee) public {\n        require(msg.sender == owner, \"Only owner can change fee\");\n        fee = newFee;\n    }\n}\n"
       },
       "project/src/contracts/effectstreaml2.sol": {

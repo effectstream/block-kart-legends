@@ -3,9 +3,7 @@
 // Loading this package in a dependency makes the onchain-runtime wasm
 // fail in runtime when trying to parse the state.
 // The next line is so that the wasm is loaded and not optimized away.
-import { NetworkId } from "@midnight-ntwrk/onchain-runtime";
-NetworkId.Undeployed;
-
+import "@midnight-ntwrk/onchain-runtime";
 
 import { init, start } from "@paimaexample/runtime";
 import { main, suspend } from "effection";

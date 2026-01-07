@@ -1,8 +1,0 @@
-{
-  "version": 3,
-  "file": "index.cjs",
-  "sourceRoot": "../../../../",
-  "sources": ["src/midnight-data.compact"],
-  "names": [],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAIA;;;;;;;;;;MAIA,AAAA,UAEC;;;;;cAFyB,UAA0B;;;;;;;;;;;yCAA1B,UAA0B;;;;;;;;;4CAA1B,UAA0B;;;OAEnD;;;GALA;EADD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAGA;;;;;;;;;uDAAwC;;;;;;;GAFvC;EAGD,AAAA,aAEC,4BAFyB,UAA0B;IAClD;;;;;;;yGAAmB,UAAQ;;uDAApB;;GACR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAHD;qCAAA;;;;;;;;;;;wFAAwC;KAAA;;;;;;;;;;;;;;"
-}

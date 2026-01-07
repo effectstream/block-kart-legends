@@ -1,11 +1,11 @@
 import { DefaultBatcherInput, MidnightAdapter } from "@paimaexample/batcher";
 import { readMidnightContract } from "@paimaexample/midnight-contracts/read-contract";
-
 import * as midnightDataContractInfo from "@kart-legends/midnight-contract-midnight-data";
-
+import { ENV } from "@paimaexample/utils/node-env";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 import { CryptoManager } from "@paimaexample/crypto";
-// import { AccountType } from "@paimaexample/wallets";
+
+const isTestnet = ENV.EFFECTSTREAM_ENV === "testnet";
 
 const {
   contractInfo: contractInfo0,
@@ -16,11 +16,11 @@ const {
 
 const GENESIS_MINT_WALLET_SEED =
   "0000000000000000000000000000000000000000000000000000000000000001";
-const indexer = "http://localhost:8088/api/v1/graphql";
-const indexerWS = "ws://localhost:8088/api/v1/graphql/ws";
+const indexer = "http://localhost:8088/api/v3/graphql";
+const indexerWS = "ws://localhost:8088/api/v3/graphql/ws";
 const node = "http://localhost:9944";
 const proofServer = "http://localhost:6300";
-const networkID = 0; // NetworkId.Undeployed,
+const networkID =  isTestnet ? 'undeployed' : 'undeployed'; // NetworkId.Undeployed,
 const syncProtocolName = "parallelMidnight";
 
 /** MIDNIGHT-READ-CONTRACT-BLOCK */
@@ -32,6 +32,10 @@ const midnightAdapterConfig0 = {
   zkConfigPath: zkConfigPath0,
   privateStateStoreName: "private-state-midnightDataContract", // Local LevelDB store
   privateStateId: "midnightDataContractPrivateState", // On-chain contract ID (must match deploy.ts)
+  walletNetworkId: networkID,
+  contractJoinTimeoutSeconds: 300, // Increase timeout to 5 minutes for private state sync
+  walletFundingTimeoutSeconds: 300, // Increase wallet funding timeout to 5 minutes
+
 };
 
 class EVMMidnightAdapter extends MidnightAdapter {
@@ -53,7 +57,7 @@ export const midnightAdapter_midnight_data = new EVMMidnightAdapter(
   new midnightDataContract.Contract(midnightDataContractInfo.witnesses),
   midnightDataContractInfo.witnesses,
   contractInfo0,
-  networkID,
+  // networkID,
   syncProtocolName
 );
 
