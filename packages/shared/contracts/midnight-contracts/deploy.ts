@@ -2,6 +2,7 @@ import {
   deployMidnightContract,
   type DeployConfig,
 } from "@paimaexample/midnight-contracts/deploy-ledger6";
+import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
 
 import {
   midnight_data,
@@ -24,7 +25,7 @@ const configs: DeployConfig[] = [
 
 const start = async () => {
   for (const config of configs) {
-    await deployMidnightContract(config);
+    await deployMidnightContract(config, midnightNetworkConfig);
   }
 };
 

@@ -5,8 +5,8 @@
   "license": "MIT",
   "imports": {
     "@nomicfoundation/ignition-core": "npm:@nomicfoundation/ignition-core@3.0.2",
-    "@paimaexample/evm-hardhat": "jsr:@paimaexample/evm-hardhat@0.3.127",
-    "@paimaexample/log": "jsr:@paimaexample/log@0.3.127",
+    "@paimaexample/evm-hardhat": "jsr:@paimaexample/evm-hardhat@0.3.129",
+    "@paimaexample/log": "jsr:@paimaexample/log@0.3.129",
     "@wagmi/cli": "npm:@wagmi/cli@2.3.1",
     "hardhat": "npm:hardhat@3.0.4",
     "@nomicfoundation/hardhat-ignition-viem": "npm:@nomicfoundation/hardhat-ignition-viem@3.0.2",
@@ -17,11 +17,8 @@
     "@nomicfoundation/hardhat-utils": "npm:@nomicfoundation/hardhat-utils@3.0.0"
   },
   "tasks": {
-    // "swap:remappings:forge": "deno -A @paimaexample/evm-hardhat/remappings-forge --depth 4",
-    // "swap:remappings:hardhat": "deno -A @paimaexample/evm-hardhat/remappings-hardhat",
     "swap:remappings:forge": "cp remappings.forge.txt remappings.txt",
     "swap:remappings:hardhat": "cp remappings.hardhat.txt remappings.txt",
-
     "check": "echo 'check'",
     "build:mod": {
       "command": "(deno task deploy:standalone || true) && deno run -A @paimaexample/evm-hardhat/builder"

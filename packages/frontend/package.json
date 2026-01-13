@@ -17,7 +17,7 @@
     "vite-plugin-node-polyfills": "^0.24.0"
   },
   "dependencies": {
-    "@paimaexample/wallets": "^0.3.125",
+    "@paimaexample/wallets": "0.3.129",
     "@thirdweb-dev/chains": "^0.1.120",
     "@thirdweb-dev/wallets": "^2.5.39",
     "@tweenjs/tween.js": "^25.0.0",
