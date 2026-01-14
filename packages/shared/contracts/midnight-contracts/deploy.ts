@@ -9,10 +9,12 @@ import {
   witnesses as midnightDataWitnesses,
 } from "./midnight-data/src/index.original.ts";
 
+const isTestnet = Deno.env.get("EFFECTSTREAM_ENV") === "testnet";
+
 const configs: DeployConfig[] = [
   {
     contractName: "midnight-data",
-    contractFileName: "contract-midnight-data.json",
+    contractFileName: isTestnet ? "contract-midnight-data.preview.json" : "contract-midnight-data.undeployed.json",
     contractClass: midnight_data.Contract,
     witnesses: midnightDataWitnesses,
     privateStateId: "midnightDataState",

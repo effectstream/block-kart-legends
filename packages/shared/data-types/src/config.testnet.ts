@@ -22,8 +22,8 @@ const mainSyncProtocolName = "mainNtp";
 let launchStartTime: number | undefined;
 let arbSepoliaTip: number = 230666729;
 
- // IMPORTANT: For testing purposes. Setting it to true, will 
- // use a new tip on each restart, making the db inconsistent.
+// IMPORTANT: For testing purposes. Setting it to true, will 
+// use a new tip on each restart, making the db inconsistent.
 const USE_TESTING_TIP = true;
 const EVM_RPC_URL = Deno ? Deno.env.get("ARBITRUM_SEPOLIA_RPC") as string : "";
 
@@ -140,7 +140,7 @@ export const config = new ConfigBuilder()
           startBlockHeight: 0,
           contractAddress:
             contractAddressesEvmMain().chain421614[
-              "effectstreaml2Module#effectstreaml2"
+            "effectstreaml2Module#effectstreaml2"
             ],
           stateMachinePrefix: `event_evm_effectstreaml2`,
         })
@@ -153,7 +153,7 @@ export const config = new ConfigBuilder()
           startBlockHeight: 1,
           contractAddress: readMidnightContract(
             "midnight-data",
-            "contract-midnight-data.json"
+            { networkId: "preview" }
           ).contractAddress,
           stateMachinePrefix: "event_midnight",
           contract: { ledger: midnightDataContract.ledger },
