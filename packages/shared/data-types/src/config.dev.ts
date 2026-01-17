@@ -109,7 +109,7 @@ export const config = new ConfigBuilder()
           startBlockHeight: 0,
           contractAddress:
             contractAddressesEvmMain().chain31337[
-              "effectstreaml2Module#effectstreaml2"
+            "effectstreaml2Module#effectstreaml2"
             ],
           stateMachinePrefix: `event_evm_effectstreaml2`,
         })
@@ -121,8 +121,7 @@ export const config = new ConfigBuilder()
           type: builtin.PrimitiveTypeMidnightGeneric,
           startBlockHeight: 1,
           contractAddress: readMidnightContract(
-            "midnight-data",
-            "contract-midnight-data.json"
+            "midnight-data"
           ).contractAddress,
           stateMachinePrefix: "event_midnight",
           contract: { ledger: midnightDataContract.ledger },

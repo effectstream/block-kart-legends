@@ -20,18 +20,17 @@ import { grammar } from "@kart-legends/data-types/grammar";
 
 main(function* () {
   yield* init();
-  console.log("Starting Paima Engine Node");
+  console.log("Starting EffectStream Node (Testnet)");
 
   yield* withEffectstreamStaticConfig(config, function* () {
     yield* start({
-      appName: "safe-solver",
-      appVersion: "0.3.126",
+      appName: "block-kart-legends",
+      appVersion: "0.3.129",
       syncInfo: toSyncProtocolWithNetwork(config),
       gameStateTransitions,
       migrations: migrationTable,
       apiRouter,
       grammar,
-      userDefinedPrimitives: {},
     });
   });
 

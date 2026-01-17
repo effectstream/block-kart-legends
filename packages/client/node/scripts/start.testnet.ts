@@ -1,11 +1,24 @@
 import { OrchestratorConfig, start } from "@paimaexample/orchestrator";
 import { ComponentNames } from "@paimaexample/log";
 import { Value } from "@sinclair/typebox/value";
-import { launchEvm } from "@paimaexample/orchestrator/start-evm";
-import { launchMidnight } from "@paimaexample/orchestrator/start-midnight";
+import { ENV } from "@paimaexample/utils/node-env";
+import {
+  isExternalProofServerConfigured,
+  midnightNetworkConfig,
+} from "@paimaexample/midnight-contracts/midnight-env";
+
+const logs = ENV.getBoolean("EFFECTSTREAM_STDOUT") ? "stdout" : "development";
+const disableStderr = logs !== "stdout";
+
+const shouldLaunchProofServer = !isExternalProofServerConfigured;
+const shouldInjectProofServerEnv =
+  !Deno.env.get("MIDNIGHT_PROOF_SERVER_URL") &&
+  !Deno.env.get("MIDNIGHT_PROOF_SERVER");
+const proofServerEnv = shouldInjectProofServerEnv
+  ? { MIDNIGHT_PROOF_SERVER_URL: midnightNetworkConfig.proofServer }
+  : undefined;
 
 const customProcesses = [
-  /** DENO-FRONTEND-BLOCK */
   {
     name: "install-frontend",
     command: "npm",
@@ -15,15 +28,6 @@ const customProcesses = [
     type: "system-dependency",
     dependsOn: [],
   },
-  // {
-  //   name: "build-frontend",
-  //   command: "node",
-  //   cwd: "../../../frontend/standalone",
-  //   args: ["esbuild.js"],
-  //   waitToExit: true,
-  //   type: "system-dependency",
-  //   dependsOn: ["install-frontend"],
-  // },
   {
     name: "serve-frontend",
     command: "npm",
@@ -35,9 +39,6 @@ const customProcesses = [
     dependsOn: ["install-frontend"],
     logs: "none",
   },
-  /** DENO-FRONTEND-BLOCK */
-
-  /** EXPLORER-BLOCK */
   {
     name: "explorer",
     args: ["run", "-A", "--unstable-detect-cjs", "@paimaexample/explorer"],
@@ -46,9 +47,6 @@ const customProcesses = [
     link: "http://localhost:10590",
     stopProcessAtPort: [10590],
   },
-  /** EXPLORER-BLOCK */
-
-  /** BATCHER-BLOCK */
   {
     name: "batcher",
     args: ["task", "-f", "@kart-legends/batcher", "start"],
@@ -56,19 +54,18 @@ const customProcesses = [
     type: "system-dependency",
     link: "http://localhost:3334",
     stopProcessAtPort: [3334],
-    dependsOn: [
-      ComponentNames.MIDNIGHT_CONTRACT,
-    ],
+    env: {
+      EFFECTSTREAM_ENV: "testnet"
+    }
   },
-  /** BATCHER-BLOCK */
 ];
 
 const config = Value.Parse(OrchestratorConfig, {
-  // Launch system processes
+  logs,
   packageName: "jsr:@paimaexample",
   processes: {
-    [ComponentNames.TMUX]: true,
-    [ComponentNames.TUI]: true,
+    [ComponentNames.TMUX]: logs === "development",
+    [ComponentNames.TUI]: logs === "development",
     // Launch Dev DB & Collector
     [ComponentNames.EFFECTSTREAM_PGLITE]: true,
     [ComponentNames.COLLECTOR]: true,
@@ -76,16 +73,39 @@ const config = Value.Parse(OrchestratorConfig, {
 
   // Launch my processes
   processesToLaunch: [
-    ...launchMidnight("@kart-legends/midnight-contracts"),
+    ...(shouldLaunchProofServer
+      ? [
+        {
+          name: ComponentNames.MIDNIGHT_PROOF_SERVER,
+          args: [
+            "task",
+            "-f",
+            "@kart-legends/midnight-contracts",
+            "midnight-proof-server:start",
+          ],
+          waitToExit: false,
+          type: "system-dependency",
+          logs: "raw",
+          logsStartDisabled: true,
+          disableStderr,
+          env: proofServerEnv,
+        },
+        {
+          name: ComponentNames.MIDNIGHT_PROOF_SERVER_WAIT,
+          args: [
+            "task",
+            "-f",
+            "@kart-legends/midnight-contracts",
+            "midnight-proof-server:wait",
+          ],
+          logs: "raw",
+          env: proofServerEnv,
+          dependsOn: [ComponentNames.MIDNIGHT_PROOF_SERVER],
+        },
+      ]
+      : []),
     ...customProcesses,
   ],
 });
-
-if (Deno.env.get("EFFECTSTREAM_STDOUT")) {
-  config.logs = "stdout";
-  config.processes[ComponentNames.TMUX] = false;
-  config.processes[ComponentNames.TUI] = false;
-  config.processes[ComponentNames.COLLECTOR] = false;
-}
 
 await start(config);
