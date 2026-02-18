@@ -33,6 +33,24 @@ export interface LeaderboardEntry {
   rank: number;
 }
 
+/** Response shape from GET /v1/game/users/:address */
+export interface GameUserProfile {
+  identity: {
+    queried_address: string;
+    resolved_address: string;
+    is_delegate: boolean;
+    display_name: string | null;
+  };
+  stats: {
+    rank: number | null;
+    score: number;
+    matches_played: number;
+  };
+  achievements: string[];
+  start_date: string;
+  end_date: string;
+}
+
 export class EffectStreamService {
 
   private delay(ms: number): Promise<void> {
@@ -184,21 +202,15 @@ export class EffectStreamService {
   }
 
   /**
-   * GET /api/address/:address -> { address, address_type, account_id }
-   * We only expose account_id to the UI.
+   * GET /v1/game/users/:address — returns whether the address is known (has account).
+   * We only expose account_id as a sentinel (1 = known, null = not found) for backward compat.
    */
   public async getAddressInfo(
     address: string,
   ): Promise<{ account_id: number | null }> {
     try {
-      const res = await fetch(`${ENV.API_URL}/api/address/${address}`);
-      if (!res.ok) return { account_id: null };
-      const data: {
-        address: string;
-        address_type: number;
-        account_id: number | null;
-      } = await this.safeJson(res);
-      return { account_id: data.account_id };
+      const res = await fetch(`${ENV.API_URL}/v1/game/users/${encodeURIComponent(address)}`);
+      return { account_id: res.ok ? 1 : null };
     } catch (e) {
       console.error("[EffectStreamService] getAddressInfo error", e);
       return { account_id: null };
@@ -206,19 +218,18 @@ export class EffectStreamService {
   }
 
   /**
-   * GET /api/account/:id -> { id, primary_address }
+   * GET /v1/game/users/:address — full user profile (identity, stats, achievements).
    */
-  public async getAccountInfo(
-    accountId: number,
-  ): Promise<{ primary_address: string | null } | null> {
+  public async getGameUserByAddress(
+    address: string,
+  ): Promise<GameUserProfile | null> {
     try {
-      const res = await fetch(`${ENV.API_URL}/api/account/${accountId}`);
+      const res = await fetch(`${ENV.API_URL}/v1/game/users/${encodeURIComponent(address)}`);
       if (!res.ok) return null;
-      const data: { id: number; primary_address: string | null } = await this
-        .safeJson(res);
-      return { primary_address: data.primary_address };
+      const data: GameUserProfile = await this.safeJson(res);
+      return data;
     } catch (e) {
-      console.error("[EffectStreamService] getAccountInfo error", e);
+      console.error("[EffectStreamService] getGameUserByAddress error", e);
       return null;
     }
   }
@@ -324,6 +335,31 @@ export class EffectStreamService {
     return true;
   }
 
+  /**
+   * Sends a delegate transaction to link the local session wallet
+   * to a chosen main wallet address.
+   */
+  async delegateToAddress(delegateToAddress: string): Promise<void> {
+    await this.ensureLocalAccount();
+    const localWallet = getLocalWallet() || await initializeLocalWallet();
+    if (!localWallet) {
+      throw new Error("Local wallet not found");
+    }
+
+    const conciseData = ["delegate", delegateToAddress];
+    console.log(
+      "[EffectStreamService] Sending delegate transaction:",
+      conciseData,
+    );
+
+    await this.sendTransactionWrapper(
+      localWallet,
+      conciseData,
+      EngineConfig,
+      "wait-effectstream-processed",
+    );
+  }
+
   // --- Session helpers (local only; no backend state) ----------
 
   public async login(
@@ -345,14 +381,17 @@ export class EffectStreamService {
   // --- Game Data (Leaderboard / Results) -----------------------
 
   /**
-   * GET /api/leaderboard -> [{ name, score }]
+   * GET /v1/game/leaderboard -> { entries: [{ rank, address, player_id, display_name, score, achievements_unlocked }], ... }
    * Adapted to LeaderboardEntry for the UI.
    */
   public async getLeaderboard(
     limit: number = 10,
   ): Promise<NetworkResponse<LeaderboardEntry[]>> {
     try {
-      const res = await fetch(`${ENV.API_URL}/api/leaderboard`);
+      const url = new URL(`${ENV.API_URL}/v1/game/leaderboard`);
+      url.searchParams.set("limit", String(limit));
+      url.searchParams.set("offset", "0");
+      const res = await fetch(url.toString());
       if (!res.ok) {
         return {
           success: true,
@@ -361,12 +400,21 @@ export class EffectStreamService {
         };
       }
 
-      const rows: { name: string; score: number }[] = await this.safeJson(res);
-      const data: LeaderboardEntry[] = rows.slice(0, limit).map((row, i) => ({
-        playerId: row.name,
-        username: row.name,
+      const body: {
+        entries: Array<{
+          rank: number;
+          address: string;
+          player_id: string;
+          display_name: string | null;
+          score: number;
+          achievements_unlocked: number;
+        }>;
+      } = await this.safeJson(res);
+      const data: LeaderboardEntry[] = (body.entries ?? []).slice(0, limit).map((row) => ({
+        playerId: row.player_id ?? row.address,
+        username: row.display_name ?? row.address ?? "Anonymous",
         score: row.score ?? 0,
-        rank: i + 1,
+        rank: row.rank ?? 0,
       }));
 
       return {

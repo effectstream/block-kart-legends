@@ -12,6 +12,10 @@ import { getConnection } from "@paimaexample/db";
 
 import * as builtin from "@paimaexample/sm/builtin";
 
+import path from "node:path";
+
+const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'shared', 'contracts', 'midnight-contracts');
+
 /**
  * Let check if the db.
  * If empty then the db is not initialized, and use the current time for the NTP sync.
@@ -121,8 +125,11 @@ export const config = new ConfigBuilder()
           type: builtin.PrimitiveTypeMidnightGeneric,
           startBlockHeight: 1,
           contractAddress: readMidnightContract(
-            "midnight-data",
-            "contract-midnight-data.json"
+            "contract-midnight-data",
+            {
+              contractFileName: "contract-midnight-data.json",
+              baseDir
+            }
           ).contractAddress,
           stateMachinePrefix: "event_midnight",
           contract: { ledger: midnightDataContract.ledger },

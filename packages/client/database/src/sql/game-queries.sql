@@ -83,3 +83,31 @@ SET name = :name!,
     car_stat4 = :car_stat4!,
     car_stat5 = :car_stat5!,
     race_items = :race_items!;
+
+/* @name InsertGameMatch */
+INSERT INTO game_matches (account_id, delegate_to, score, surface, played_at)
+VALUES (:account_id!, :delegate_to!, :score!, :surface, NOW());
+
+/* @name GetWinsBySurface */
+SELECT surface, COUNT(*)::int AS wins
+FROM game_matches
+WHERE delegate_to = :delegate_to!
+  AND score > 0
+  AND surface IS NOT NULL
+GROUP BY surface;
+
+/* @name UnlockAchievement */
+INSERT INTO achievement_unlocks (account_id, achievement_id, delegate_to)
+VALUES (:account_id!, :achievement_id!, :delegate_to!)
+ON CONFLICT (account_id, achievement_id) DO UPDATE
+SET delegate_to = EXCLUDED.delegate_to;
+
+/* @name UpdateGameMatchesDelegateTo */
+UPDATE game_matches
+SET delegate_to = :delegate_to_address!
+WHERE account_id = :account_id!;
+
+/* @name UpdateAchievementUnlocksDelegateTo */
+UPDATE achievement_unlocks
+SET delegate_to = :delegate_to_address!
+WHERE account_id = :account_id!;

@@ -6,16 +6,22 @@ import { type SyncStateUpdateStream, World } from "@paimaexample/coroutine";
 import {
   completeRace,
   createRace,
-  getAddressByAddress,
   getGameState,
+  getResolvedAddressByAccountId,
+  getResolvedIdentityByAddress,
+  getWinsBySurface,
   incrementGamesLost,
+  insertGameMatch,
   setAccountName,
+  unlockAchievement,
+  updateAchievementUnlocksDelegateTo,
+  updateGameMatchesDelegateTo,
+  upsertDelegation,
 } from "@kart-legends/database";
-import {
-  INewScheduledHeightDataParams,
-  newScheduledHeightData,
-} from "@paimaexample/db";
-import { AddressType, WalletAddress } from "@paimaexample/utils";
+import type { INewScheduledHeightDataParams } from "@paimaexample/db";
+import { newScheduledHeightData } from "@paimaexample/db";
+import type { WalletAddress } from "@paimaexample/utils";
+import { AddressType } from "@paimaexample/utils";
 import { type PlayerConfig, runSimulation } from "@kart-legends/game-simulation";
 
 const stm = new PaimaSTM<typeof grammar, any>(grammar);
@@ -40,17 +46,93 @@ function* getAccountId(address?: WalletAddress, _?: AddressType) {
     console.log(`[getAccountId] No address provided`);
     return null;
   }
-  const [addrInfo] = yield* World.resolve(getAddressByAddress, { address });
-  if (!addrInfo) {
+  const [identity] = yield* World.resolve(getResolvedIdentityByAddress, { address });
+  if (!identity) {
     console.log(`[getAccount] No address for ${address}`);
     return null;
   }
-  if (!addrInfo.account_id) {
+  if (!identity.account_id) {
     console.log(`[getAccountId] No account for ${address}`);
     return null;
   }
 
-  return addrInfo.account_id;
+  return identity.account_id;
+}
+
+// Achievements thresholds based on total wins / losses
+const WIN_ACHIEVEMENTS: Array<{ id: string; threshold: number }> = [
+  { id: "win_1_race", threshold: 1 },
+  // { id: "win_2_races", threshold: 2 },
+  { id: "win_5_races", threshold: 5 },
+  { id: "win_10_races", threshold: 10 },
+  { id: "win_20_races", threshold: 20 },
+  { id: "win_30_races", threshold: 30 },
+  { id: "win_40_races", threshold: 40 },
+  { id: "win_100_races", threshold: 100 },
+  { id: "win_250_races", threshold: 250 },
+];
+
+const LOSS_ACHIEVEMENTS: Array<{ id: string; threshold: number }> = [
+  { id: "lose_1_race", threshold: 1 },
+  { id: "lose_5_races", threshold: 5 },
+  { id: "lose_10_races", threshold: 10 },
+  { id: "lose_50_races", threshold: 50 },
+  { id: "lose_100_races", threshold: 100 },
+];
+
+const SURFACE_ACHIEVEMENTS: Array<{ id: string; surface: string; threshold: number }> = [
+  { id: "win_10_dirt", surface: "DIRT", threshold: 10 },
+  { id: "win_10_ice", surface: "ICE", threshold: 10 },
+  { id: "win_10_asphalt", surface: "ASPHALT", threshold: 10 },
+];
+
+function* maybeAwardProgressAchievements(
+  accountId: number,
+  delegateTo: string,
+  gamesWon: number,
+  gamesLost: number,
+): Generator<any, void, any> {
+  for (const { id, threshold } of WIN_ACHIEVEMENTS) {
+    if (gamesWon >= threshold) {
+      yield* World.resolve(unlockAchievement, {
+        account_id: accountId,
+        achievement_id: id,
+        delegate_to: delegateTo,
+      });
+    }
+  }
+
+  for (const { id, threshold } of LOSS_ACHIEVEMENTS) {
+    if (gamesLost >= threshold) {
+      yield* World.resolve(unlockAchievement, {
+        account_id: accountId,
+        achievement_id: id,
+        delegate_to: delegateTo,
+      });
+    }
+  }
+
+  // Surface-specific win achievements
+  const winsBySurfaceRows = yield* World.resolve(getWinsBySurface, {
+    delegate_to: delegateTo,
+  });
+  const winsMap = new Map<string, number>();
+  const winsList = Array.isArray(winsBySurfaceRows) ? winsBySurfaceRows : [];
+  for (const row of winsList) {
+    if (row.surface != null && row.wins != null) {
+      winsMap.set(row.surface.toUpperCase(), row.wins);
+    }
+  }
+  for (const { id, surface, threshold } of SURFACE_ACHIEVEMENTS) {
+    const wins = winsMap.get(surface) ?? 0;
+    if (wins >= threshold) {
+      yield* World.resolve(unlockAchievement, {
+        account_id: accountId,
+        achievement_id: id,
+        delegate_to: delegateTo,
+      });
+    }
+  }
 }
 
 stm.addStateTransition("setName", function* (data) {
@@ -70,6 +152,37 @@ stm.addStateTransition("setName", function* (data) {
   if (accountId === null) return;
   console.log(`🎉 [setName] Account ${accountId} -> ${name}`);
   yield* World.resolve(setAccountName, { account_id: accountId, name });
+});
+
+stm.addStateTransition("delegate", function* (data) {
+  const { delegateToAddress } = data.parsedInput;
+  if (!delegateToAddress || delegateToAddress.length < 3) {
+    console.log("[delegate] Invalid delegateToAddress");
+    return;
+  }
+
+  const accountId = yield* getAccountId(
+    data.signerAddress,
+    data.signerAddressType,
+  );
+  if (accountId === null) return;
+
+  console.log(
+    `🎉 [delegate] Account ${accountId} delegates to ${delegateToAddress}`,
+  );
+  yield* World.resolve(upsertDelegation, {
+    account_id: accountId,
+    delegate_to_address: delegateToAddress,
+  });
+  // Update all existing score_entries and achievement_unlocks to the new delegate address
+  yield* World.resolve(updateGameMatchesDelegateTo, {
+    account_id: accountId,
+    delegate_to_address: delegateToAddress,
+  });
+  yield* World.resolve(updateAchievementUnlocksDelegateTo, {
+    account_id: accountId,
+    delegate_to_address: delegateToAddress,
+  });
 });
 
 stm.addStateTransition("play", function* (data) {
@@ -213,7 +326,7 @@ stm.addStateTransition("executeRace", function* (data) {
     })),
   };
 
-  const raceResults = runSimulation(
+  const { results: raceResults, surface } = runSimulation(
     playerConfig,
     stringToHash(gameState.race_hash!),
   );
@@ -237,16 +350,52 @@ ${dataTable.join("\n")}
 ===========`,
   );
 
-  // Complete race: mark not busy, add score
+  // Resolved identity: effectstream.accounts.primary_address or delegations.delegate_to_address
+  const [resolvedRow] = yield* World.resolve(getResolvedAddressByAccountId, {
+    account_id: accountId,
+  });
+  const delegateTo = resolvedRow?.resolved_address ?? "";
+  if (!delegateTo) {
+    console.log(
+      `[executeRace] No resolved address for account ${accountId}, skipping match/achievement write`,
+    );
+  }
+
+  // Always record a match for leaderboard & stats (with delegate_to for identity)
+  if (delegateTo) {
+    yield* World.resolve(insertGameMatch, {
+      account_id: accountId,
+      delegate_to: delegateTo,
+      score,
+      surface,
+    });
+  }
+
+  // Complete race: mark not busy, add score or loss
   if (score > 0) {
     yield* World.resolve(completeRace, {
       account_id: accountId,
-      score: score,
+      score,
     });
   } else {
     yield* World.resolve(incrementGamesLost, {
       account_id: accountId,
     });
+  }
+
+  // Fetch updated state and award achievements (pass delegate_to for identity)
+  const [updatedState] = yield* World.resolve(getGameState, {
+    account_id: accountId,
+  });
+  if (updatedState && delegateTo) {
+    const gamesWon = updatedState.games_won ?? 0;
+    const gamesLost = updatedState.games_lost ?? 0;
+    yield* maybeAwardProgressAchievements(
+      accountId,
+      delegateTo,
+      gamesWon,
+      gamesLost,
+    );
   }
 });
 

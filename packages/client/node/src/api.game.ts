@@ -2,8 +2,8 @@ import { type Static, Type } from "@sinclair/typebox";
 import { runPreparedQuery } from "@paimaexample/db";
 import {
   getAccountProfile,
-  getAddressByAddress,
   getGameState,
+  getResolvedIdentityByAddress,
 } from "@kart-legends/database";
 import type { Pool } from "pg";
 import type fastify from "fastify";
@@ -32,19 +32,19 @@ export const apiGame = async (
   }>("/api/gamestate/:walletAddress", async (request, reply) => {
     const { walletAddress } = request.params;
 
-    // Resolve address to account
-    const [addressInfo] = await runPreparedQuery(
-      getAddressByAddress.run({ address: walletAddress }, dbConn),
-      "getAddressByAddress"
+    // Resolve address to account (delegation-aware)
+    const [identity] = await runPreparedQuery(
+      getResolvedIdentityByAddress.run({ address: walletAddress }, dbConn),
+      "getResolvedIdentityByAddress"
     );
 
-    if (!addressInfo || !addressInfo.account_id) {
+    if (!identity || !identity.account_id) {
       reply.code(404).send({ error: "Account not found" });
       return;
     }
 
     const [gameState] = await runPreparedQuery(
-      getGameState.run({ account_id: addressInfo.account_id }, dbConn),
+      getGameState.run({ account_id: identity.account_id }, dbConn),
       "getGameState"
     );
 
@@ -103,13 +103,13 @@ export const apiGame = async (
   }>("/api/user/:walletAddress", async (request, reply) => {
     const { walletAddress } = request.params;
 
-    // Resolve address to account
-    const [addressInfo] = await runPreparedQuery(
-      getAddressByAddress.run({ address: walletAddress }, dbConn),
-      "getAddressByAddress"
+    // Resolve address to account (delegation-aware)
+    const [identity] = await runPreparedQuery(
+      getResolvedIdentityByAddress.run({ address: walletAddress }, dbConn),
+      "getResolvedIdentityByAddress"
     );
 
-    if (!addressInfo || !addressInfo.account_id) {
+    if (!identity || !identity.account_id) {
       // New user or no account yet
       reply.send({
         accountId: 0,
@@ -121,7 +121,7 @@ export const apiGame = async (
     }
 
     const [profile] = await runPreparedQuery(
-      getAccountProfile.run({ account_id: addressInfo.account_id }, dbConn),
+      getAccountProfile.run({ account_id: identity.account_id }, dbConn),
       "getAccountProfile"
     );
 
@@ -141,7 +141,7 @@ export const apiGame = async (
     }
 
     reply.send({
-      accountId: addressInfo.account_id,
+      accountId: identity.account_id,
       balance: profile.balance ?? 0,
       lastLogin: profile.last_login_at
         ? new Date(profile.last_login_at).getTime()

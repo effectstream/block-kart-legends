@@ -3,10 +3,10 @@ import { getConnection } from "@paimaexample/db";
 // import { standAloneApplyMigrations } from "@paimaexample/db-emulator";
 import { standAloneApplyMigrations } from "./src/patch-emulator.ts";
 import { migrationTable } from "./src/migration-order.ts";
-import { localhostConfig } from "@kart-legends/data-types/localhostConfig";
+import { config } from "@kart-legends/data-types/config-dev";
 
 // This helper applies Paima Engine Migrations to the database, so you can use it to generate the pgtyped files.
-const db = await getConnection();
-await standAloneApplyMigrations(db, migrationTable, localhostConfig as any, {});
+const db: any = await getConnection();
+await standAloneApplyMigrations(db, migrationTable, config as any, {});
 console.log("✅ System & User migrations applied");
 Deno.exit(0);

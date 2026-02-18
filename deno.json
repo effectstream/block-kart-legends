@@ -12,9 +12,9 @@
     "check": "deno task -f @kart-legends/node check"
   },
   "imports": {
-    "@paimaexample/tui": "jsr:@paimaexample/tui@0.3.127",
-    "@paimaexample/midnight-contracts": "jsr:@paimaexample/midnight-contracts@0.3.127",
-    "@paimaexample/evm-contracts": "jsr:@paimaexample/evm-contracts@0.3.127",
+    "@paimaexample/tui": "jsr:@paimaexample/tui@0.7.1",
+    "@paimaexample/midnight-contracts": "jsr:@paimaexample/midnight-contracts@0.7.1",
+    "@paimaexample/evm-contracts": "jsr:@paimaexample/evm-contracts@0.7.1",
     "@std/path": "jsr:@std/path@^1.1.3"
   },
   "lint": {

@@ -6,8 +6,7 @@
     "./contract": "./src/managed/midnight-data/contract/index.js"
   },
   "tasks": {
-    "compact": "compact compile +0.27.0 src/midnight-data.compact src/managed/midnight-data && deno task convert:js",
-    "convert:js": "deno run -A convert-js.ts src/managed/midnight-data/contract/index.js src/managed/midnight-data/contract/index.ts",
+    "compact": "compact compile +0.29.0 src/midnight-data.compact src/managed/midnight-data",
     "contract:compile": "deno task compact"
   },
   "imports": {

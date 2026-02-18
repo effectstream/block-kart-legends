@@ -4,14 +4,16 @@ import * as midnightDataContractInfo from "@kart-legends/midnight-contract-midni
 import { ENV } from "@paimaexample/utils/node-env";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 import { CryptoManager } from "@paimaexample/crypto";
+import path from "node:path";
 
 const isTestnet = ENV.EFFECTSTREAM_ENV === "testnet";
+const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'shared', 'contracts', 'midnight-contracts');
 
 const {
   contractInfo: contractInfo0,
   contractAddress: contractAddress0,
   zkConfigPath: zkConfigPath0,
-} = readMidnightContract("midnight-data", "contract-midnight-data.json");
+} = readMidnightContract("contract-midnight-data", { contractFileName: "contract-midnight-data.json", baseDir });
 /** MIDNIGHT-READ-CONTRACT-BLOCK  */
 
 const GENESIS_MINT_WALLET_SEED =
@@ -38,7 +40,7 @@ const midnightAdapterConfig0 = {
 
 };
 
-class EVMMidnightAdapter extends MidnightAdapter {
+class EVMMidnightAdapter extends MidnightAdapter<typeof midnightDataContract.Contract> {
   // @ts-ignore next line mismatch super type
   override async verifySignature(input: DefaultBatcherInput): Promise<boolean> {
     const {target, address, addressType, timestamp, signature} = input;
@@ -54,7 +56,7 @@ export const midnightAdapter_midnight_data = new EVMMidnightAdapter(
   contractAddress0,
   GENESIS_MINT_WALLET_SEED,
   midnightAdapterConfig0,
-  new midnightDataContract.Contract(midnightDataContractInfo.witnesses),
+  midnightDataContract.Contract,
   midnightDataContractInfo.witnesses,
   contractInfo0,
   // networkID,
@@ -62,7 +64,7 @@ export const midnightAdapter_midnight_data = new EVMMidnightAdapter(
 );
 
 
-export const midnightAdapters: Record<string, MidnightAdapter> = {
+export const midnightAdapters: Record<string, MidnightAdapter<typeof midnightDataContract.Contract>> = {
   // @ts-ignore next line mismatch super type
   "midnight-data": midnightAdapter_midnight_data,
 };

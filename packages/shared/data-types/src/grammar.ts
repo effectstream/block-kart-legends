@@ -7,6 +7,9 @@ export const effectstreamL2Grammar = {
   submitScore: [
     ["accountId", Type.Integer()],
   ],
+  delegate: [
+    ["delegateToAddress", Type.String()],
+  ],
   play: [
     ["stat1", Type.Integer()],
     ["stat2", Type.Integer()],
