@@ -176,20 +176,6 @@ export const apiCommon = async (
     const { address } = request.params;
     const { start_date, end_date } = request.query;
 
-    // Resolve identity
-    const [identityRow] = await runPreparedQuery(
-      getResolvedIdentityByAddress.run({ address }, dbConn),
-      "getResolvedIdentityByAddress"
-    );
-
-    if (!identityRow) {
-      reply.code(404).send({ error: "Address not found" });
-      return;
-    }
-
-    const resolvedAddress =
-      identityRow.resolved_address ?? identityRow.queried_address;
-
     // Achievements timeframe (spec query params)
     const now = new Date();
     const achievementsEnd = end_date ? new Date(end_date) : now;
@@ -200,7 +186,7 @@ export const apiCommon = async (
     const achievementsRows = await runPreparedQuery(
       getUserAchievementsByResolvedAddress.run(
         {
-          resolved_address: resolvedAddress,
+          resolved_address: address,
           start_date: achievementsStart.toISOString(),
           end_date: achievementsEnd.toISOString(),
         },
@@ -213,7 +199,7 @@ export const apiCommon = async (
     const statsRows = await runPreparedQuery(
       getUserStatsByResolvedAddress.run(
         {
-          resolved_address: resolvedAddress,
+          resolved_address: address,
           start_date: new Date(0).toISOString(),
           end_date: new Date("9999-12-31T23:59:59.999Z").toISOString(),
         },
@@ -224,12 +210,33 @@ export const apiCommon = async (
 
     const statsRow = statsRows[0];
 
+    // Resolve identity (delegation-aware) if possible. If not found, fall back to a
+    // simple identity built from the requested address as the resolved identity.
+    const [identityRow] = await runPreparedQuery(
+      getResolvedIdentityByAddress.run({ address }, dbConn),
+      "getResolvedIdentityByAddress"
+    );
+
+    const hasIdentity = Boolean(identityRow);
+    const resolvedAddress =
+      identityRow?.resolved_address ??
+      identityRow?.queried_address ??
+      address;
+
+    // If we have neither an identity row nor any stats/achievements, treat as not found.
+    if (!hasIdentity && !statsRow && achievementsRows.length === 0) {
+      reply.code(404).send({ error: "Address not found" });
+      return;
+    }
+
     reply.send({
       identity: {
-        queried_address: identityRow.queried_address,
+        queried_address: identityRow?.queried_address ?? address,
         resolved_address: resolvedAddress,
-        is_delegate: Boolean(identityRow.is_delegate),
-        display_name: identityRow.display_name,
+        is_delegate: hasIdentity ? Boolean(identityRow?.is_delegate) : false,
+        display_name:
+          identityRow?.display_name ??
+          (resolvedAddress === address ? address : resolvedAddress),
       },
       stats: {
         rank: statsRow && statsRow.rank != null ? Number(statsRow.rank) : null,

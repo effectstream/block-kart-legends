@@ -88,6 +88,10 @@ h2, h3, h4 {
   flex: 1;
   gap: 20px;
   height: 100%;
+  width: 100%;
+  min-height: 800px;
+  max-height: 900px;
+  min-width: 800px;
 }
 
 #game-area {
@@ -144,6 +148,7 @@ h2, h3, h4 {
   pointer-events: auto;
   padding: 20px;
   box-sizing: border-box;
+  /* max-height: 500px; */
 }
 
 /* Custom override for start screen to show intro scene */
@@ -561,4 +566,15 @@ td {
 }
 .car-tooltip .stat-value {
     font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  #content-wrapper {
+    min-width: 0;
+  }
+
+  /* Hide ranking/leaderboard sidebar on mobile */
+  #sidebar {
+    display: none;
+  }
 }
