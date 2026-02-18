@@ -3,9 +3,10 @@ import { hardhat } from "viem/chains";
 
 // TODO We need to set this from env variables
 export const ENV = {
-  L2_CONTRACT_ADDRESS: "0x5FbDB2315678afecb367f032d93F642f64180aa3" as `0x${string}`,
-  BATCHER_URL: "http://localhost:3334",
-  API_URL: "http://localhost:9999",
+	
+  L2_CONTRACT_ADDRESS:"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0" /* "0x5FbDB2315678afecb367f032d93F642f64180aa3" */ as `0x${string}`,
+  BATCHER_URL: "https://batcher-game2.paimastudios.com",
+  API_URL: "https://api-game2.paimastudios.com",
 }
 
 const syncProtocolName = "mainEvmRPC";
