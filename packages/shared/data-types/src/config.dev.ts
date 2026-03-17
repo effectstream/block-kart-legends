@@ -133,7 +133,7 @@ export const config = new ConfigBuilder()
           ).contractAddress,
           stateMachinePrefix: "event_midnight",
           contract: { ledger: midnightDataContract.ledger },
-          networkId: 0,
+          networkId: 'undeployed',
         })
       )
   )

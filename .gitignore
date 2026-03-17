@@ -22,3 +22,4 @@ midnight-level-db/
 # Temporary files
 packages/client/node/tmux.conf
 packages/client/node/install.sh
+batcher-debug.log
