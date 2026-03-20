@@ -5,7 +5,6 @@
 import { OrchestratorConfig, start } from "@paimaexample/orchestrator";
 import { ComponentNames } from "@paimaexample/log";
 import { Value } from "@sinclair/typebox/value";
-import { launchMidnight } from "@paimaexample/orchestrator/start-midnight";
 
 const customProcesses = [
   /** BATCHER-BLOCK */
@@ -17,7 +16,6 @@ const customProcesses = [
     link: "http://localhost:3334",
     stopProcessAtPort: [3334],
     dependsOn: [
-      ComponentNames.MIDNIGHT_CONTRACT,
     ],
   },
   /** BATCHER-BLOCK */
@@ -35,7 +33,6 @@ const config = Value.Parse(OrchestratorConfig, {
 
   // Launch my processes
   processesToLaunch: [
-    ...launchMidnight("@kart-legends/midnight-contracts"),
     ...customProcesses,
   ],
 });
