@@ -1,3 +1,7 @@
+// start.dev.ts — Local development environment
+// - Launches EVM (hardhat) + Midnight local nodes
+// - Batcher depends on both EVM contract deployment and Midnight contract
+// - Uses EFFECTSTREAM_ENV=dev → loads .env.dev
 import { OrchestratorConfig, start } from "@paimaexample/orchestrator";
 import { ComponentNames } from "@paimaexample/log";
 import { Value } from "@sinclair/typebox/value";

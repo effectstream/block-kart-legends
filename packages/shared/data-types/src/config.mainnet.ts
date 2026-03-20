@@ -1,4 +1,3 @@
-import { contractAddressesEvmMain } from "@kart-legends/evm-contracts";
 import { readMidnightContract } from "@paimaexample/midnight-contracts/read-contract";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 
@@ -7,48 +6,21 @@ import {
   ConfigNetworkType,
   ConfigSyncProtocolType,
 } from "@paimaexample/config";
-import { hardhat } from "viem/chains";
-import { getConnection } from "@paimaexample/db";
-import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
 
 import * as builtin from "@paimaexample/sm/builtin";
-
 import path from "node:path";
+import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
 
-const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'shared', 'contracts', 'midnight-contracts');
+const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contracts', 'midnight-contracts');
+
+const mainSyncProtocolName = "mainNtp";
+let launchStartTime: number | undefined;
 
 const MIDNIGHT_INDEXER = midnightNetworkConfig.indexer;
 const MIDNIGHT_INDEXER_WS = midnightNetworkConfig.indexerWS;
 const MIDNIGHT_NODE_URL = midnightNetworkConfig.node;
-if (midnightNetworkConfig.id !== 'undeployed') {
+if (midnightNetworkConfig.id !== 'mainnet') {
   throw new Error("Invalid midnight network id");
-}
-
-/**
- * Let check if the db.
- * If empty then the db is not initialized, and use the current time for the NTP sync.
- * If not, we recreate the original state configuration.
- */
-
-const mainSyncProtocolName = "mainNtp";
-let launchStartTime: number | undefined;
-const dbConn = getConnection();
-try {
-  // TODO Update to effectstream.sync_protocol_pagination
-  const result = await dbConn.query(`
-    SELECT * FROM effectstream.sync_protocol_pagination 
-    WHERE protocol_name = '${mainSyncProtocolName}' 
-    ORDER BY page_number ASC
-    LIMIT 1
-  `);
-  if (!result || !result.rows.length) {
-    throw new Error("DB is empty");
-  }
-  launchStartTime =
-    result.rows[0].page.root - result.rows[0].page_number * 1000;
-} catch {
-  // This is not an error.
-  // Do nothing, the DB has not been initialized yet.
 }
 
 export const config = new ConfigBuilder()
@@ -61,17 +33,13 @@ export const config = new ConfigBuilder()
         startTime: launchStartTime ?? new Date().getTime(),
         blockTimeMS: 1000,
       })
-      .addViemNetwork({
-        ...hardhat,
-        name: "evmMain",
-      })
       .addNetwork({
         name: "midnight",
         type: ConfigNetworkType.MIDNIGHT,
         genesisHash:
           "0x0000000000000000000000000000000000000000000000000000000000000001",
         networkId: midnightNetworkConfig.id,
-        nodeUrl: midnightNetworkConfig.node,
+        nodeUrl: MIDNIGHT_NODE_URL,
       })
   )
   .buildDeployments(builder => builder)
@@ -85,17 +53,6 @@ export const config = new ConfigBuilder()
           chainUri: "",
           startBlockHeight: 1,
           pollingInterval: 500,
-        })
-      )
-      .addParallel(
-        (networks) => networks.evmMain,
-        (network, deployments) => ({
-          name: "mainEvmRPC",
-          type: ConfigSyncProtocolType.EVM_RPC_PARALLEL,
-          chainUri: network.rpcUrls.default.http[0],
-          startBlockHeight: 1,
-          pollingInterval: 500,
-          confirmationDepth: 0,
         })
       )
       .addParallel(
@@ -114,19 +71,6 @@ export const config = new ConfigBuilder()
   .buildPrimitives((builder) =>
     builder
       .addPrimitive(
-        (syncProtocols) => syncProtocols.mainEvmRPC,
-        (network, deployments, syncProtocol) => ({
-          name: "primitive_effectstreaml2",
-          type: builtin.PrimitiveTypeEVMPaimaL2,
-          startBlockHeight: 0,
-          contractAddress:
-            contractAddressesEvmMain().chain31337[
-              "effectstreaml2Module#effectstreaml2"
-            ],
-          stateMachinePrefix: `event_evm_effectstreaml2`,
-        })
-      )
-      .addPrimitive(
         (syncProtocols) => syncProtocols.parallelMidnight,
         (network, deployments, syncProtocol) => ({
           name: "primitive_midnight-data",
@@ -141,7 +85,7 @@ export const config = new ConfigBuilder()
           ).contractAddress,
           stateMachinePrefix: "event_midnight",
           contract: { ledger: midnightDataContract.ledger },
-          networkId: 'undeployed',
+          networkId: midnightNetworkConfig.id,
         })
       )
   )

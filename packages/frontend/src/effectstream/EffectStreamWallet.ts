@@ -33,9 +33,19 @@ interface WalletOption {
 
 let localWallet: IWallet | null = null;
 let connectedWallet: IWallet | null = null;
+let midnightAddress: string | null = null;
+
+export function truncateAddress(addr: string): string {
+  if (addr.length <= 14) return addr;
+  return addr.substring(0, 10) + '...' + addr.substring(addr.length - 4);
+}
 
 export function getLocalWallet() {
   return localWallet;
+}
+
+export function getMidnightAddress() {
+  return midnightAddress;
 }
 
 export async function initializeLocalWallet() {
@@ -76,6 +86,34 @@ export async function initializeLocalWallet() {
   }
 }
 
+/**
+ * Check on page load if the local wallet already has a delegation.
+ * If so, update the Connect Wallet button and SET PLAYER NAME button.
+ */
+export async function checkExistingDelegation() {
+  const connectWalletBtn = document.getElementById('connect-wallet-btn');
+
+  let local = localWallet;
+  if (!local) {
+    local = await initializeLocalWallet();
+  }
+  if (!local) return;
+
+  const api = new EffectStreamService();
+  try {
+    const user = await api.getGameUserByAddress(local.walletAddress);
+    if (user?.identity) {
+      const hasDelegation = user.identity.resolved_address !== user.identity.queried_address;
+      if (hasDelegation && connectWalletBtn) {
+        midnightAddress = user.identity.resolved_address;
+        connectWalletBtn.textContent = "WALLET CONNECTED";
+      }
+    }
+  } catch (e) {
+    // Not found or error — no delegation yet
+  }
+}
+
 export async function updateSetNameButtonLabel() {
   const btnSetName = document.getElementById('btn-set-name');
   if (!btnSetName) return;
@@ -92,7 +130,7 @@ export async function updateSetNameButtonLabel() {
 
   // Determine the effective address (Account Primary Address if available)
   let effectiveAddress: string | null = null;
-  const currentAddress = (wallet && wallet.walletAddress) || (local && local.walletAddress);
+  const currentAddress = midnightAddress || (wallet && wallet.walletAddress) || (local && local.walletAddress);
 
   if (currentAddress) {
     try {
@@ -111,7 +149,7 @@ export async function updateSetNameButtonLabel() {
   }
 
   if (!effectiveAddress) {
-    btnSetName.textContent = "SET NAME";
+    btnSetName.textContent = "SET PLAYER NAME";
     return;
   }
 
@@ -129,12 +167,58 @@ export async function updateSetNameButtonLabel() {
 
   if (nameFound) return;
 
-  // 2. Use Effective Address (truncated)
-  const addr = effectiveAddress;
-  btnSetName.textContent = addr.substring(0, 6) + '...' + addr.substring(addr.length - 4);
+  // 2. Use Effective Address (truncated, full on hover)
+  btnSetName.textContent = truncateAddress(effectiveAddress);
+  btnSetName.title = effectiveAddress;
 }
 
+/**
+ * Connect to the Midnight extension wallet via dapp-connector-api.
+ * Returns the shielded address from the wallet, or null if not available.
+ */
+export async function connectMidnightWallet(): Promise<string | null> {
+  try {
+    // Wait a bit for wallets to inject
+    await new Promise(resolve => setTimeout(resolve, 200));
 
+    const injectedWallets = await allInjectedWallets({ signatureSupport: false, transactionSupport: false });
+    const midnightWallets = injectedWallets?.[WalletMode.Midnight] ?? [];
+
+    if (!midnightWallets.length) {
+      console.warn("No Midnight wallet extension found");
+      alert("No Midnight wallet extension found. Please install the Midnight Lace wallet.");
+      return null;
+    }
+
+    // Connect to the first available Midnight wallet
+    const wallet = midnightWallets[0];
+    console.log("Connecting to Midnight wallet:", wallet.metadata.displayName);
+
+    const loginOptions = {
+      mode: WalletMode.Midnight,
+      preference: { name: wallet.metadata.name },
+      preferBatchedMode: false,
+    };
+
+    const result = await walletLogin(loginOptions as any);
+
+    if (!result.success) {
+      console.error("Midnight wallet login failed:", result.errorMessage);
+      alert("Failed to connect Midnight wallet: " + result.errorMessage);
+      return null;
+    }
+
+    connectedWallet = { ...result.result, mode: WalletMode.Midnight };
+    midnightAddress = connectedWallet.walletAddress;
+    console.log("Midnight wallet connected, address:", midnightAddress);
+
+    return midnightAddress;
+  } catch (e) {
+    console.error("Failed to connect Midnight wallet", e);
+    alert("Failed to connect Midnight wallet.");
+    return null;
+  }
+}
 
 
 export async function getAvailableWallets(): Promise<WalletOption[]> {
@@ -145,7 +229,7 @@ export async function getAvailableWallets(): Promise<WalletOption[]> {
     // Wait a bit for wallets to inject
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    const injectedWallets = await allInjectedWallets();
+    const injectedWallets = await allInjectedWallets({ signatureSupport: false, transactionSupport: false });
 
     if (injectedWallets) {
       for (const [modeStr, walletList] of Object.entries(injectedWallets)) {
@@ -221,11 +305,38 @@ export function initWalletUI() {
   const delegateStatus = document.getElementById('delegate-status');
 
   if (connectWalletBtn) {
-    connectWalletBtn.addEventListener('click', () => {
-      if (walletModal) {
-        walletModal.style.display = 'flex';
-      } else {
-        console.error("Wallet modal not found");
+    connectWalletBtn.addEventListener('click', async () => {
+      // Connect to Midnight wallet extension
+      const address = await connectMidnightWallet();
+      if (address) {
+        // Auto-fill the delegate address input
+        if (delegateInput) {
+          delegateInput.value = address;
+        }
+
+        // Check if this address is already delegated
+        const api = new EffectStreamService();
+        try {
+          const user = await api.getGameUserByAddress(address);
+          if (user?.identity?.is_delegate) {
+            connectWalletBtn.textContent = "WALLET CONNECTED";
+          } else {
+            connectWalletBtn.textContent = "WALLET CONNECTED";
+            // Show the delegation modal so user can delegate
+            if (walletModal) {
+              walletModal.style.display = 'flex';
+            }
+          }
+        } catch (e) {
+          connectWalletBtn.textContent = "WALLET CONNECTED";
+          // Show modal for delegation
+          if (walletModal) {
+            walletModal.style.display = 'flex';
+          }
+        }
+
+        // Update the name button with address/delegated address
+        await updateSetNameButtonLabel();
       }
     });
   }
@@ -263,6 +374,10 @@ export function initWalletUI() {
         if (delegateStatus) {
           delegateStatus.textContent = "Delegation transaction sent. It may take a moment to appear.";
         }
+        // Update Connect Wallet button
+        if (connectWalletBtn) {
+          connectWalletBtn.textContent = "WALLET CONNECTED";
+        }
       } catch (e: any) {
         console.error("Failed to delegate address", e);
         alert("Failed to send delegation transaction.");
@@ -273,4 +388,3 @@ export function initWalletUI() {
     });
   }
 }
-

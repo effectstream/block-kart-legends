@@ -1,7 +1,7 @@
 import { ItemPlacement, VehicleStats } from "../simulation/types.ts";
 import { sendTransaction } from "@paimaexample/wallets";
 import { EngineConfig } from "./EffectStreamEngineConfig.ts";
-import { getLocalWallet, initializeLocalWallet } from "./EffectStreamWallet.ts";
+import { getLocalWallet, initializeLocalWallet, truncateAddress } from "./EffectStreamWallet.ts";
 import { showToast } from "../Toast.ts";
 import { accountPayload_ as accountPayload } from "@paimaexample/wallets";
 import { ENV } from "./EffectStreamEngineConfig.ts";
@@ -149,8 +149,7 @@ export class EffectStreamService {
     try {
       const res = await fetch(`${ENV.API_URL}/api/user/${walletAddress}`);
       if (!res.ok) {
-        const fallbackName = walletAddress.slice(0, 6) + "..." +
-          walletAddress.slice(-4);
+        const fallbackName = truncateAddress(walletAddress);
         return {
           id: "0",
           username: fallbackName,
@@ -412,7 +411,7 @@ export class EffectStreamService {
       } = await this.safeJson(res);
       const data: LeaderboardEntry[] = (body.entries ?? []).slice(0, limit).map((row) => ({
         playerId: row.player_id ?? row.address,
-        username: row.display_name ?? row.address ?? "Anonymous",
+        username: truncateAddress(row.display_name ?? row.address ?? "Anonymous"),
         score: row.score ?? 0,
         rank: row.rank ?? 0,
       }));
