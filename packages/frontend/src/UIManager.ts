@@ -741,7 +741,7 @@ export class UIManager {
 
             item.innerHTML = `
                 <span class="rank">#${entry.rank}</span>
-                <span class="name">${entry.username}</span>
+                <span class="name" title="${entry.username}">${entry.username}</span>
                 <div style="font-size: 0.8em; color: #aaa; margin-top: 2px;">Score: ${entry.score}</div>
             `;
             this.leaderboardList.appendChild(item);

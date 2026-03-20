@@ -8,11 +8,17 @@ import {
   ConfigSyncProtocolType,
 } from "@paimaexample/config";
 import { arbitrumSepolia } from "viem/chains";
-import { getConnection } from "@paimaexample/db";
+import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
 
 import * as builtin from "@paimaexample/sm/builtin";
 import path from "node:path";
 
+const MIDNIGHT_INDEXER = midnightNetworkConfig.indexer;
+const MIDNIGHT_INDEXER_WS = midnightNetworkConfig.indexerWS;
+const MIDNIGHT_NODE_URL = midnightNetworkConfig.node;
+if (midnightNetworkConfig.id !== 'preview') {
+  throw new Error("Invalid midnight network id");
+}
 
 const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contracts', 'midnight-contracts');
 
@@ -25,47 +31,9 @@ const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contract
 const mainSyncProtocolName = "mainNtp";
 let launchStartTime: number | undefined;
 let arbSepoliaTip: number = 230666729;
-
- // IMPORTANT: For testing purposes. Setting it to true, will 
- // use a new tip on each restart, making the db inconsistent.
-const USE_TESTING_TIP = true;
-const EVM_RPC_URL = Deno ? Deno.env.get("ARBITRUM_SEPOLIA_RPC") as string : "";
-
-const dbConn = getConnection();
-try {
-  if (Deno && USE_TESTING_TIP) {
-    /* Get the latest block number from the Arbitrum Sepolia chain */
-    const response = await fetch(EVM_RPC_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'eth_blockNumber', // Standard RPC method to get the latest block number
-        params: []
-      }),
-    });
-    const data = await response.json();
-    arbSepoliaTip = parseInt(data.result, 16);
-  }
-
-  // TODO Update to effectstream.sync_protocol_pagination
-  const result = await dbConn.query(`
-    SELECT * FROM effectstream.sync_protocol_pagination 
-    WHERE protocol_name = '${mainSyncProtocolName}' 
-    ORDER BY page_number ASC
-    LIMIT 1
-  `);
-  if (!result || !result.rows.length) {
-    throw new Error("DB is empty");
-  }
-  launchStartTime =
-    result.rows[0].page.root - result.rows[0].page_number * 1000;
-} catch {
-  // This is not an error.
-  // Do nothing, the DB has not been initialized yet.
+const EVM_RPC_URL = Deno.env.get("ARBITRUM_SEPOLIA_RPC") as string;
+if (!EVM_RPC_URL) {
+  throw new Error("ARBITRUM_SEPOLIA_RPC is not set");
 }
 
 export const config = new ConfigBuilder()
@@ -92,8 +60,8 @@ export const config = new ConfigBuilder()
         type: ConfigNetworkType.MIDNIGHT,
         genesisHash:
           "0x0000000000000000000000000000000000000000000000000000000000000001",
-        networkId: 'undeployed',
-        nodeUrl: "http://127.0.0.1:9944",
+        networkId: midnightNetworkConfig.id,
+        nodeUrl: midnightNetworkConfig.node,
       })
   )
   .buildDeployments(builder => builder)
@@ -128,8 +96,8 @@ export const config = new ConfigBuilder()
           type: ConfigSyncProtocolType.MIDNIGHT_PARALLEL,
           startBlockHeight: 1,
           pollingInterval: 1000,
-          indexer: "http://127.0.0.1:8088/api/v3/graphql",
-          indexerWs: "ws://127.0.0.1:8088/api/v3/graphql/ws",
+          indexer: MIDNIGHT_INDEXER,
+          indexerWs: MIDNIGHT_INDEXER_WS,
           delayMs: 30000,
         })
       )

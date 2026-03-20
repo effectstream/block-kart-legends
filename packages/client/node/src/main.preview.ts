@@ -1,11 +1,11 @@
-// main.dev.ts — Local development runtime
-// - config-dev: hardhat EVM + local Midnight (networkId: undeployed)
+// main.preview.ts — Preview/staging runtime
+// - config-preview: Arbitrum Sepolia EVM + Midnight testnet (networkId: undeployed)
 // NOTE: onchain-runtime import is a workaround to preload the wasm module.
 import "@midnight-ntwrk/onchain-runtime";
 
 import { init, start } from "@paimaexample/runtime";
 import { main, suspend } from "effection";
-import { config } from "@kart-legends/data-types/config-dev";
+import { config } from "@kart-legends/data-types/config-preview";
 import {
   type SyncProtocolWithNetwork,
   toSyncProtocolWithNetwork,
