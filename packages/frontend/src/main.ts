@@ -23,6 +23,23 @@ const init = () => {
     // SET PLAYER NAME button is now display-only (shows address or delegated address)
     // No click handler needed - the button is non-interactive (pointer-events: none)
 
+    // Footer overlay toggle
+    const footerLink = document.getElementById("bkl-footer-link");
+    const linksOverlay = document.getElementById("bkl-links-overlay");
+    const linksClose = document.getElementById("bkl-links-close");
+    if (footerLink && linksOverlay && linksClose) {
+        footerLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            linksOverlay.style.display = "flex";
+        });
+        linksClose.addEventListener("click", () => {
+            linksOverlay.style.display = "none";
+        });
+        linksOverlay.addEventListener("click", (e) => {
+            if (e.target === linksOverlay) linksOverlay.style.display = "none";
+        });
+    }
+
     // The container for the Three.js canvas
     const containerId = "game-canvas-container";
     const container = document.getElementById(containerId);
