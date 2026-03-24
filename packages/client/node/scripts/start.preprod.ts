@@ -1,7 +1,7 @@
-// start.preview.ts — Preview/staging environment (Midnight testnet + Arbitrum Sepolia)
+// start.preprod.ts — Preprod/staging environment (Midnight testnet + Arbitrum Sepolia)
 // - Launches Midnight only (no local EVM node — uses remote Arbitrum Sepolia RPC)
 // - Batcher depends on Midnight contract only
-// - Uses EFFECTSTREAM_ENV=preview → loads .env.preview
+// - Uses EFFECTSTREAM_ENV=preprod → loads .env.preprod
 import { OrchestratorConfig, start } from "@paimaexample/orchestrator";
 import { ComponentNames } from "@paimaexample/log";
 import { Value } from "@sinclair/typebox/value";

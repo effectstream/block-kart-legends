@@ -6,15 +6,15 @@
     ".": "./src/main.ts"
   },
   "tasks": {
-    "check": "deno check --unstable-raw-imports src/main.dev.ts && deno check --unstable-raw-imports src/main.preview.ts && deno check --unstable-raw-imports src/main.mainnet.ts",
+    "check": "deno check --unstable-raw-imports src/main.dev.ts && deno check --unstable-raw-imports src/main.preprod.ts && deno check --unstable-raw-imports src/main.mainnet.ts",
 
     "node:start:dev": "deno run -A --inspect --unstable-raw-imports src/main.dev.ts",
-    "node:start:preview": "deno run -A --inspect --unstable-raw-imports src/main.preview.ts",
+    "node:start:preprod": "deno run -A --inspect --unstable-raw-imports src/main.preprod.ts",
     "node:start:mainnet": "deno run -A --inspect --unstable-raw-imports src/main.mainnet.ts",
 
     "dev": "deno task -f @paimaexample/tui clean && EFFECTSTREAM_ENV=dev NODE_ENV=development deno run -A --check --unstable-raw-imports scripts/start.dev.ts",
-    "preview": "deno task -f @paimaexample/tui clean && EFFECTSTREAM_ENV=preview NODE_ENV=development deno run -A --check --unstable-raw-imports scripts/start.preview.ts",
-    "mainnet": "deno task -f @paimaexample/tui clean && EFFECTSTREAM_ENV=mainnet NODE_ENV=production deno run -A --check --unstable-raw-imports scripts/start.mainnet.ts",
+    "preprod": "EFFECTSTREAM_ENV=preprod NODE_ENV=development deno run -A --check --unstable-raw-imports scripts/start.preprod.ts",
+    "mainnet": "EFFECTSTREAM_ENV=mainnet NODE_ENV=production deno run -A --check --unstable-raw-imports scripts/start.mainnet.ts",
 
     "test": "deno run -A --unstable-raw-imports --check scripts/e2e.test.ts"
   },

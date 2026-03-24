@@ -7,7 +7,7 @@
     "dev": "vite --mode undeployed",
     "build:undeployed": "tsc && vite build --mode undeployed",
     "build:testnet": "tsc && vite build --mode testnet",
-    "preview": "vite preview",
+    "preprod": "vite preprod",
     "serve": "npx http-server ./dist"
   },
   "devDependencies": {

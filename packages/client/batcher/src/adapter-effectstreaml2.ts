@@ -1,17 +1,17 @@
 import { PaimaL2DefaultAdapter } from "@paimaexample/batcher";
 import { contractAddressesEvmMain } from "@kart-legends/evm-contracts";
-import { ENV } from "@paimaexample/utils/node-env";
+import { getEnv } from "@paimaexample/utils"; 
 import * as chains from "viem/chains";
 import type { Chain } from "viem";
 
-const isMainnet = ENV.EFFECTSTREAM_ENV === "mainnet";
-const isPreview = ENV.EFFECTSTREAM_ENV === "preview";
-const isUndeployed = ENV.EFFECTSTREAM_ENV === "dev";
+const isMainnet = getEnv("EFFECTSTREAM_ENV") === "mainnet";
+const isPreprod = getEnv("EFFECTSTREAM_ENV") === "preprod";
+const isUndeployed = getEnv("EFFECTSTREAM_ENV") === "dev";
 
 let chainNameId: keyof typeof contractAddressesEvmMain;
 if (isMainnet) {
   chainNameId = "chain42161" as keyof typeof contractAddressesEvmMain;
-} else if (isPreview) {
+} else if (isPreprod) {
   chainNameId = "chain421614" as keyof typeof contractAddressesEvmMain;
 } else if (isUndeployed) {
   chainNameId = "chain31337" as keyof typeof contractAddressesEvmMain;
@@ -27,7 +27,7 @@ if (!paimaL2Address) {
 
 const paimaSyncProtocolName = "mainEvmRPC";
 
-const batcherPrivateKey = ENV.getString("BATCHER_EVM_SECRET_KEY") as `0x${string}`;
+const batcherPrivateKey = getEnv("BATCHER_EVM_SECRET_KEY") as `0x${string}`;
 if (!batcherPrivateKey) {
   throw new Error("Batcher private key not found");
 }
@@ -36,26 +36,26 @@ if (!batcherPrivateKey) {
 const paimaL2Fee = 0n; // old batcher defaulted to 0 for local dev
 
 let chain: Chain;
-if (isPreview) {
-  if (!ENV.getString("ARBITRUM_SEPOLIA_RPC_URL")) {
+if (isPreprod) {
+  if (!getEnv("ARBITRUM_SEPOLIA_RPC_URL")) {
     throw new Error("ARBITRUM_SEPOLIA_RPC_URL is not set");
   }
   chain = chains.arbitrumSepolia;
   chain.rpcUrls = {
     default: {
-      http: [ENV.getString("ARBITRUM_SEPOLIA_RPC_URL")],
+      http: [getEnv("ARBITRUM_SEPOLIA_RPC_URL")!],
     },
   };
 } else if (isUndeployed) {
   chain = chains.hardhat;
 } else if (isMainnet) {
-  if (!ENV.getString("ARBITRUM_ONE_RPC_URL")) {
+  if (!getEnv("ARBITRUM_ONE_RPC_URL")) {
     throw new Error("ARBITRUM_ONE_RPC_URL is not set");
   }
   chain = chains.arbitrum;
   chain.rpcUrls = {
     default: {
-      http: [ENV.getString("ARBITRUM_ONE_RPC_URL")],
+      http: [getEnv("ARBITRUM_ONE_RPC_URL")!],
     },
   };
 } else {

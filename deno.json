@@ -8,7 +8,7 @@
     "build:evm": "deno task -f @kart-legends/evm-contracts build:mod",
     "build:midnight": "deno task -r compact",
     "dev": "deno task -f @kart-legends/node dev",
-    "preview": "deno task -f @kart-legends/node preview",
+    "preprod": "deno task -f @kart-legends/node preprod",
     "mainnet": "deno task -f @kart-legends/node mainnet",
     "check": "deno task -f @kart-legends/node check"
   },

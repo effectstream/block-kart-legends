@@ -1,11 +1,11 @@
-// main.preview.ts — Preview/staging runtime
-// - config-preview: Arbitrum Sepolia EVM + Midnight testnet (networkId: undeployed)
+// main.preprod.ts — Preprod/staging runtime
+// - config-preprod: Arbitrum Sepolia EVM + Midnight testnet (networkId: undeployed)
 // NOTE: onchain-runtime import is a workaround to preload the wasm module.
 import "@midnight-ntwrk/onchain-runtime";
 
 import { init, start } from "@paimaexample/runtime";
 import { main, suspend } from "effection";
-import { config } from "@kart-legends/data-types/config-preview";
+import { config } from "@kart-legends/data-types/config-preprod";
 import {
   type SyncProtocolWithNetwork,
   toSyncProtocolWithNetwork,

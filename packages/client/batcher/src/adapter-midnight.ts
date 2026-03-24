@@ -1,7 +1,8 @@
 import { DefaultBatcherInput, MidnightAdapter } from "@paimaexample/batcher";
 import { readMidnightContract } from "@paimaexample/midnight-contracts/read-contract";
 import * as midnightDataContractInfo from "@kart-legends/midnight-contract-midnight-data";
-import { ENV } from "@paimaexample/utils/node-env";
+// import { ENV } from "@paimaexample/utils/node-env";
+import { getEnv } from "@paimaexample/utils";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 import { CryptoManager } from "@paimaexample/crypto";
 import path from "node:path";
@@ -55,7 +56,7 @@ let seeds: string[] = [];
 if (midnightNetworkConfig.id === 'undeployed') {
   seeds = [midnightNetworkConfig.walletSeed];
 } else {
-  ENV.getString("MIDNIGHT_WALLET_SEEDS", '').split(',').forEach(seed => {
+  (getEnv("MIDNIGHT_WALLET_SEEDS") || '').split(',').forEach(seed => {
     if (seed) seeds.push(seed);
   });
   if (seeds.length === 0) {

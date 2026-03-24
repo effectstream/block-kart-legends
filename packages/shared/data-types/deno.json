@@ -4,7 +4,7 @@
   "license": "MIT",
   "exports": {
     "./config-dev": "./src/config.dev.ts",
-    "./config-preview": "./src/config.preview.ts",
+    "./config-preprod": "./src/config.preprod.ts",
     "./config-mainnet": "./src/config.mainnet.ts",
     "./grammar": "./src/grammar.ts"
   },
