@@ -4,8 +4,20 @@ import { ENV } from "@paimaexample/utils/node-env";
 import * as chains from "viem/chains";
 import type { Chain } from "viem";
 
-const isTestnet = ENV.EFFECTSTREAM_ENV === "testnet";
-const chainNameId = isTestnet ? "chain421614" : "chain31337";
+const isMainnet = ENV.EFFECTSTREAM_ENV === "mainnet";
+const isPreview = ENV.EFFECTSTREAM_ENV === "preview";
+const isUndeployed = ENV.EFFECTSTREAM_ENV === "dev";
+
+let chainNameId: keyof typeof contractAddressesEvmMain;
+if (isMainnet) {
+  chainNameId = "chain42161" as keyof typeof contractAddressesEvmMain;
+} else if (isPreview) {
+  chainNameId = "chain421614" as keyof typeof contractAddressesEvmMain;
+} else if (isUndeployed) {
+  chainNameId = "chain31337" as keyof typeof contractAddressesEvmMain;
+} else {
+  throw new Error("Invalid effectstream environment");
+}
 
 // Config values mirroring ./packages/client/node/scripts/start.ts
 const paimaL2Address = contractAddressesEvmMain()[chainNameId]["effectstreaml2Module#effectstreaml2"] as `0x${string}`;
@@ -24,15 +36,30 @@ if (!batcherPrivateKey) {
 const paimaL2Fee = 0n; // old batcher defaulted to 0 for local dev
 
 let chain: Chain;
-if (isTestnet) {
+if (isPreview) {
+  if (!ENV.getString("ARBITRUM_SEPOLIA_RPC_URL")) {
+    throw new Error("ARBITRUM_SEPOLIA_RPC_URL is not set");
+  }
   chain = chains.arbitrumSepolia;
   chain.rpcUrls = {
     default: {
-      http: [ENV.getString("ARBITRUM_SEPOLIA_RPC")],
+      http: [ENV.getString("ARBITRUM_SEPOLIA_RPC_URL")],
+    },
+  };
+} else if (isUndeployed) {
+  chain = chains.hardhat;
+} else if (isMainnet) {
+  if (!ENV.getString("ARBITRUM_ONE_RPC_URL")) {
+    throw new Error("ARBITRUM_ONE_RPC_URL is not set");
+  }
+  chain = chains.arbitrum;
+  chain.rpcUrls = {
+    default: {
+      http: [ENV.getString("ARBITRUM_ONE_RPC_URL")],
     },
   };
 } else {
-  chain = chains.hardhat;
+  throw new Error("Invalid effectstream environment");
 }
 
 // PaimaL2 EVM adapter

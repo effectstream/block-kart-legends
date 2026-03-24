@@ -5,8 +5,8 @@ import { ENV } from "@paimaexample/utils/node-env";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 import { CryptoManager } from "@paimaexample/crypto";
 import path from "node:path";
-
-const isTestnet = ENV.EFFECTSTREAM_ENV === "testnet";
+import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
+import process from "node:process";
 const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'shared', 'contracts', 'midnight-contracts');
 
 const {
@@ -16,13 +16,11 @@ const {
 } = readMidnightContract("contract-midnight-data", { contractFileName: "contract-midnight-data.json", baseDir });
 /** MIDNIGHT-READ-CONTRACT-BLOCK  */
 
-const GENESIS_MINT_WALLET_SEED =
-  "0000000000000000000000000000000000000000000000000000000000000001";
-const indexer = "http://localhost:8088/api/v3/graphql";
-const indexerWS = "ws://localhost:8088/api/v3/graphql/ws";
-const node = "http://localhost:9944";
-const proofServer = "http://localhost:6300";
-const networkID =  isTestnet ? 'undeployed' : 'undeployed'; // NetworkId.Undeployed,
+const indexer = midnightNetworkConfig.indexer;
+const indexerWS = midnightNetworkConfig.indexerWS;
+const node = midnightNetworkConfig.node;
+const proofServer = midnightNetworkConfig.proofServer;
+const networkID = midnightNetworkConfig.id;
 const syncProtocolName = "parallelMidnight";
 
 /** MIDNIGHT-READ-CONTRACT-BLOCK */
@@ -37,6 +35,7 @@ const midnightAdapterConfig0 = {
   walletNetworkId: networkID,
   contractJoinTimeoutSeconds: 300, // Increase timeout to 5 minutes for private state sync
   walletFundingTimeoutSeconds: 300, // Increase wallet funding timeout to 5 minutes
+  contractName: "contract-midnight-data",
 
 };
 
@@ -52,9 +51,21 @@ class EVMMidnightAdapter extends MidnightAdapter<typeof midnightDataContract.Con
   }
 }
 
+let seeds: string[] = [];
+if (midnightNetworkConfig.id === 'undeployed') {
+  seeds = [midnightNetworkConfig.walletSeed];
+} else {
+  ENV.getString("MIDNIGHT_WALLET_SEEDS", '').split(',').forEach(seed => {
+    if (seed) seeds.push(seed);
+  });
+  if (seeds.length === 0) {
+    throw new Error("No wallet seeds found");
+  }
+}
+
 export const midnightAdapter_midnight_data = new EVMMidnightAdapter(
   contractAddress0,
-  GENESIS_MINT_WALLET_SEED,
+  seeds,
   midnightAdapterConfig0,
   midnightDataContract.Contract,
   midnightDataContractInfo.witnesses,
