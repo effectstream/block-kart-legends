@@ -16,7 +16,7 @@ import path from "node:path";
 const MIDNIGHT_INDEXER = midnightNetworkConfig.indexer;
 const MIDNIGHT_INDEXER_WS = midnightNetworkConfig.indexerWS;
 const MIDNIGHT_NODE_URL = midnightNetworkConfig.node;
-if (midnightNetworkConfig.id !== 'preview') {
+if (midnightNetworkConfig.id !== 'preprod') {
   throw new Error("Invalid midnight network id");
 }
 
