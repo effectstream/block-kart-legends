@@ -5,7 +5,7 @@ import {
   WalletNameMap,
   // LoginOptions,
 } from "@paimaexample/wallets";
-import { hardhat } from "viem/chains";
+import { hardhat, arbitrumSepolia } from "viem/chains";
 import { LocalWallet } from "@thirdweb-dev/wallets";
 import { getChainByChainIdAsync } from "@thirdweb-dev/chains";
 import { EffectStreamService } from "./EffectStreamService.ts";
@@ -276,7 +276,7 @@ export async function login(walletOption: WalletOption) {
     mode: walletOption.mode,
     preference: walletOption.preference,
     preferBatchedMode: false,
-    chain: (walletOption.mode === WalletMode.EvmInjected || walletOption.mode === WalletMode.EvmEthers) ? (hardhat as any) : undefined,
+    chain: (walletOption.mode === WalletMode.EvmInjected || walletOption.mode === WalletMode.EvmEthers) ? (({ hardhat, arbitrumSepolia } as Record<string, any>)[import.meta.env.VITE_CHAIN ?? "hardhat"] ?? hardhat) : undefined,
     checkChainId: checkChainId,
   };
 

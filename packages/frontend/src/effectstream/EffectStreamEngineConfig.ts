@@ -1,17 +1,23 @@
 import { PaimaEngineConfig } from "@paimaexample/wallets";
-import { hardhat } from "viem/chains";
+import { hardhat, arbitrumSepolia } from "viem/chains";
 
-// TODO We need to set this from env variables
+const chains: Record<string, any> = {
+  hardhat,
+  arbitrumSepolia,
+};
+
 export const ENV = {
-  L2_CONTRACT_ADDRESS: "0x5FbDB2315678afecb367f032d93F642f64180aa3" as `0x${string}`,
-  BATCHER_URL: "http://localhost:3334",
-  API_URL: "http://localhost:9999",
+  L2_CONTRACT_ADDRESS: (import.meta.env.VITE_L2_CONTRACT_ADDRESS) as `0x${string}`,
+  BATCHER_URL: import.meta.env.VITE_BATCHER_URL,
+  API_URL: import.meta.env.VITE_API_URL,
 }
+
+const chainName = import.meta.env.VITE_CHAIN;
+const chain = chains[chainName];
 
 const syncProtocolName = "mainEvmRPC";
 const appName = "";
 const useBatching = true;
-const chain = hardhat as any;
 
 // Configuration
 export const EngineConfig = new PaimaEngineConfig(

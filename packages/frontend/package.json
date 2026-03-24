@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build:undeployed": "tsc && vite build --mode undeployed",
+    "build:testnet": "tsc && vite build --mode testnet",
     "preview": "vite preview",
     "serve": "npx http-server ./dist"
   },
