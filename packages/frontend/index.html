@@ -19,6 +19,7 @@
         <div style="margin-left: auto; display: flex; gap: 10px;">
             <button id="btn-set-name" class="wallet-btn" style="display: none; position: static; transform: none; pointer-events: none; cursor: default;">SET PLAYER NAME</button>
             <button id="connect-wallet-btn" class="wallet-btn" style="position: static; transform: none;">Connect Wallet</button>
+            <button id="mute-btn" class="wallet-btn" style="position: static; transform: none; min-width: auto; padding: 6px 10px; font-size: 1.1em;" title="Toggle Sound">&#x1F50A;</button>
         </div>
       </header>
       
@@ -68,9 +69,16 @@
       <div id="content-wrapper">
         <aside id="sidebar">
           <h3 id="sidebar-title">Leaderboard</h3>
-          <div id="leaderboard-list">
+          <div id="leaderboard-list" class="sidebar-panel active">
             <!-- Leaderboard items -->
             <div class="leaderboard-item">Waiting for race...</div>
+          </div>
+          <div id="achievements-list" class="sidebar-panel" style="display:none;">
+            <!-- Achievement items rendered by JS -->
+          </div>
+          <div id="sidebar-tabs">
+            <button class="sidebar-tab active" data-tab="leaderboard">Leaderboard</button>
+            <button class="sidebar-tab" data-tab="achievements">Achievements</button>
           </div>
         </aside>
 

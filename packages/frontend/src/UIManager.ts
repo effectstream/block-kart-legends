@@ -5,7 +5,8 @@ import {
     VehicleStats,
 } from "./simulation/types.ts";
 import { ItemThumbnailGenerator } from "./ItemThumbnailGenerator.ts";
-import { LeaderboardEntry } from "./effectstream/EffectStreamService.ts";
+import { AchievementInfo, LeaderboardEntry } from "./effectstream/EffectStreamService.ts";
+import { soundManager } from "./SoundManager.ts";
 
 export class UIManager {
     private startScreen: HTMLElement;
@@ -13,8 +14,11 @@ export class UIManager {
     private resultsScreen: HTMLElement;
     private screens: HTMLElement[];
     private leaderboardList: HTMLElement;
+    private achievementsList: HTMLElement;
     private sidebarTitle: HTMLElement;
     private carTooltip: HTMLElement;
+    private activeTab: "leaderboard" | "achievements" = "leaderboard";
+    private onTabChangeCallback: ((tab: string) => void) | null = null;
 
     // Form inputs
     private speedInput: HTMLInputElement;
@@ -56,7 +60,10 @@ export class UIManager {
         this.screens = [this.startScreen, this.setupScreen, this.resultsScreen];
 
         this.leaderboardList = document.getElementById("leaderboard-list")!;
+        this.achievementsList = document.getElementById("achievements-list")!;
         this.sidebarTitle = document.getElementById("sidebar-title")!;
+
+        this.initSidebarTabs();
 
         // Car Tooltip
         this.carTooltip = document.createElement("div");
@@ -168,6 +175,75 @@ export class UIManager {
         this.initLeaderboardHover();
     }
 
+    private initSidebarTabs() {
+        const tabs = document.querySelectorAll<HTMLButtonElement>(".sidebar-tab");
+        tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+                const target = tab.dataset.tab as "leaderboard" | "achievements";
+                if (!target || target === this.activeTab) return;
+                this.activeTab = target;
+
+                tabs.forEach((t) => t.classList.toggle("active", t.dataset.tab === target));
+
+                if (target === "leaderboard") {
+                    this.sidebarTitle.innerText = "Leaderboard";
+                    this.leaderboardList.style.display = "";
+                    this.achievementsList.style.display = "none";
+                } else {
+                    this.sidebarTitle.innerText = "Achievements";
+                    this.leaderboardList.style.display = "none";
+                    this.achievementsList.style.display = "";
+                }
+
+                soundManager.play("click");
+                this.onTabChangeCallback?.(target);
+            });
+        });
+    }
+
+    public onTabChange(cb: (tab: string) => void) {
+        this.onTabChangeCallback = cb;
+    }
+
+    public updateAchievements(
+        allAchievements: AchievementInfo[],
+        unlockedIds: string[],
+    ) {
+        const container = this.achievementsList;
+        container.innerHTML = "";
+
+        const unlockedSet = new Set(unlockedIds);
+
+        allAchievements.forEach((ach) => {
+            const unlocked = unlockedSet.has(ach.name);
+            const item = document.createElement("div");
+            item.className = `achievement-item ${unlocked ? "unlocked" : "locked"}`;
+
+            const img = document.createElement("img");
+            img.className = "achievement-icon";
+            img.src = ach.iconURI || "";
+            img.alt = ach.displayName;
+            img.loading = "lazy";
+            item.appendChild(img);
+
+            const info = document.createElement("div");
+            info.className = "achievement-info";
+
+            const name = document.createElement("div");
+            name.className = "achievement-name";
+            name.textContent = ach.displayName;
+            info.appendChild(name);
+
+            const desc = document.createElement("div");
+            desc.className = "achievement-desc";
+            desc.textContent = ach.description;
+            info.appendChild(desc);
+
+            item.appendChild(info);
+            container.appendChild(item);
+        });
+    }
+
     private initLeaderboardHover() {
         this.leaderboardList.addEventListener("mouseover", (e) => {
             const target = e.target as HTMLElement;
@@ -225,6 +301,9 @@ export class UIManager {
                     // Revert
                     input.value = prevValue.toString();
                 } else {
+                    if (newValue !== prevValue) {
+                        soundManager.play("sliderTick");
+                    }
                     prevValue = newValue;
                     displays[index].innerText = input.value;
                     this.updateBudgetDisplay();
@@ -550,6 +629,7 @@ export class UIManager {
             this.draggedItemIndex = index;
             this.draggedFromSlot = isInSlot;
             el.classList.add("dragging");
+            soundManager.play("itemPickup");
 
             // Optional: set drag image to the thumbnail
             if (e.dataTransfer) {
@@ -570,6 +650,7 @@ export class UIManager {
     private handleDropToSlot(e: DragEvent, slotIndex: number) {
         e.preventDefault();
         if (this.draggedItemIndex === null) return;
+        soundManager.play("itemDrop");
 
         // Find the slot element to remove highlight
         // Since we re-render, we might not need to remove manually if we re-render fast enough,
@@ -605,6 +686,7 @@ export class UIManager {
         if (this.draggedFromSlot) {
             // Delete from slot (don't add back to pool as pool is static)
             this.slots[this.draggedItemIndex] = null;
+            soundManager.play("cancel");
         }
         // If from pool to pool, do nothing
 

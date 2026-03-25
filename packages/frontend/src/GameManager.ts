@@ -17,13 +17,15 @@ import {
     RaceResult,
     GameSnapshot,
 } from "./simulation/GameSimulator.ts";
-import { EffectStreamService } from "./effectstream/EffectStreamService.ts";
+import { AchievementInfo, EffectStreamService } from "./effectstream/EffectStreamService.ts";
+import { getLocalWallet, getMidnightAddress } from "./effectstream/EffectStreamWallet.ts";
 import { createItemModel } from "./models/index.ts";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { CRTShader } from "./shaders/CRTShader.ts";
 import { RNG } from "./simulation/RNG.ts";
+import { soundManager } from "./SoundManager.ts";
 
 const NUMBER_OF_BOTS = 7;
 const DEBUG = false; // Set to true to run shared simulation and comparison logs
@@ -45,6 +47,7 @@ export class GameManager {
     private simulator!: GameSimulator;
     private trackPoints!: THREE.Vector3[];
     private api: EffectStreamService;
+    private cachedAchievements: AchievementInfo[] = [];
     private trackConfig!: TrackConfig;
     // private currentConfig: PlayerConfig | null = null;
     private introGroup: THREE.Group | null = null;
@@ -65,6 +68,7 @@ export class GameManager {
 
     private accumulator: number = 0;
     private readonly FIXED_STEP: number = 16.66; // Match shared simulation timestep
+    private prevItemState: Map<string, ItemType | null> = new Map();
 
     private stringToHash(str: string): number {
         let hash = 0;
@@ -95,8 +99,9 @@ export class GameManager {
         this.uiManager = new UIManager();
         this.bindUI();
 
-        // Load initial leaderboard
+        // Load initial leaderboard and achievements
         this.loadLeaderboard();
+        this.loadAchievements();
 
         // Generate Track Config (Initial)
 
@@ -240,14 +245,74 @@ export class GameManager {
         this.camera.lookAt(0, 0, 0);
     }
 
+    private getUserAddress(): string | null {
+        const midnight = getMidnightAddress();
+        if (midnight) return midnight;
+        const local = getLocalWallet();
+        return local?.walletAddress ?? null;
+    }
+
     private async loadLeaderboard() {
         try {
             const response = await this.api.getLeaderboard();
             if (response.success && response.data) {
-                this.uiManager.updateGlobalLeaderboard(response.data);
+                const entries = response.data;
+
+                // If the current user is not in the leaderboard, append their stats
+                const addr = this.getUserAddress();
+                if (addr) {
+                    const resolved = await this.api.getGameUserByAddress(addr).catch(() => null);
+                    const resolvedAddr = resolved?.identity?.address;
+                    const inList = resolvedAddr
+                        ? entries.some((e) => e.playerId === resolvedAddr)
+                        : false;
+                    if (!inList && resolved) {
+                        const stats = resolved.channels?.leaderboard?.stats;
+                        if (stats && stats.rank > 0) {
+                            const displayName = resolved.identity.displayName ?? resolvedAddr ?? addr;
+                            entries.push({
+                                playerId: resolved.identity.address,
+                                username: displayName.length > 12
+                                    ? displayName.slice(0, 6) + "..." + displayName.slice(-4)
+                                    : displayName,
+                                score: stats.score,
+                                rank: stats.rank,
+                            });
+                        }
+                    }
+                }
+
+                this.uiManager.updateGlobalLeaderboard(entries);
             }
         } catch (error) {
             console.error("Failed to load leaderboard:", error);
+        }
+    }
+
+    private async loadAchievements() {
+        try {
+            const response = await this.api.getAchievements();
+            if (response.success && response.data) {
+                this.cachedAchievements = response.data;
+            }
+
+            // Fetch user's unlocked achievements
+            let unlockedIds: string[] = [];
+            const addr = this.getUserAddress();
+            if (addr) {
+                try {
+                    const user = await this.api.getGameUserByAddress(addr);
+                    if (user) {
+                        unlockedIds = user.achievements;
+                    }
+                } catch {
+                    // Ignore
+                }
+            }
+
+            this.uiManager.updateAchievements(this.cachedAchievements, unlockedIds);
+        } catch (error) {
+            console.error("Failed to load achievements:", error);
         }
     }
 
@@ -263,6 +328,12 @@ export class GameManager {
 
         this.uiManager.onRestartClick(() => {
             this.resetGame();
+        });
+
+        this.uiManager.onTabChange((tab) => {
+            if (tab === "achievements") {
+                this.loadAchievements();
+            }
         });
 
         // Key listeners
@@ -385,8 +456,9 @@ export class GameManager {
 
         this.setupIntroScene();
 
-        // Reload global leaderboard instead of clearing
+        // Reload global leaderboard and achievements
         this.loadLeaderboard();
+        this.loadAchievements();
     }
 
     public async startRace(playerConfig: PlayerConfig) {
@@ -666,6 +738,23 @@ export class GameManager {
 
         // Sync visual cars with simulation state
         const simCars = this.simulator.getCars();
+
+        // Detect item usage and play sounds
+        for (const simCar of simCars) {
+            const prevItem = this.prevItemState.get(simCar.id);
+            if (prevItem && simCar.currentItem !== prevItem) {
+                const itemSounds: Record<string, "itemMushroom" | "itemBanana" | "itemRedShell" | "itemStar" | "itemLightning"> = {
+                    "Mushroom": "itemMushroom",
+                    "Banana": "itemBanana",
+                    "Red Shell": "itemRedShell",
+                    "Star": "itemStar",
+                    "Lightning": "itemLightning",
+                };
+                const sound = itemSounds[prevItem];
+                if (sound) soundManager.play(sound);
+            }
+            this.prevItemState.set(simCar.id, simCar.currentItem);
+        }
 
         this.cars.forEach((car) => {
             const simState = simCars.find((c) => c.id === car.id);
@@ -1031,6 +1120,7 @@ export class GameManager {
         if (playerResult) {
             try {
                 this.loadLeaderboard();
+                this.loadAchievements();
             } catch (e) {
                 console.error("Failed to submit result", e);
             }

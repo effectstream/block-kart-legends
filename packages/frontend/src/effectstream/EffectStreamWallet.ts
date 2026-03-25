@@ -103,9 +103,9 @@ export async function checkExistingDelegation() {
   try {
     const user = await api.getGameUserByAddress(local.walletAddress);
     if (user?.identity) {
-      const hasDelegation = user.identity.resolved_address !== user.identity.queried_address;
+      const hasDelegation = user.identity.delegatedFrom.length > 0;
       if (hasDelegation && connectWalletBtn) {
-        midnightAddress = user.identity.resolved_address;
+        midnightAddress = user.identity.address;
         connectWalletBtn.textContent = "WALLET CONNECTED";
       }
     }
@@ -135,8 +135,8 @@ export async function updateSetNameButtonLabel() {
   if (currentAddress) {
     try {
       const user = await api.getGameUserByAddress(currentAddress);
-      if (user?.identity?.resolved_address) {
-        effectiveAddress = user.identity.resolved_address;
+      if (user?.identity?.address) {
+        effectiveAddress = user.identity.address;
       }
     } catch (e) {
       console.error("Error determining primary address", e);
@@ -318,7 +318,7 @@ export function initWalletUI() {
         const api = new EffectStreamService();
         try {
           const user = await api.getGameUserByAddress(address);
-          if (user?.identity?.is_delegate) {
+          if ((user?.identity?.delegatedFrom?.length ?? 0) > 0) {
             connectWalletBtn.textContent = "WALLET CONNECTED";
           } else {
             connectWalletBtn.textContent = "WALLET CONNECTED";

@@ -5,6 +5,7 @@ import {
     initWalletUI,
     updateSetNameButtonLabel,
 } from "./effectstream/EffectStreamWallet.ts";
+import { soundManager } from "./SoundManager.ts";
 
 // Basic entry point
 console.log("Block Kart Legends started");
@@ -22,6 +23,17 @@ const init = () => {
 
     // SET PLAYER NAME button is now display-only (shows address or delegated address)
     // No click handler needed - the button is non-interactive (pointer-events: none)
+
+    // Mute toggle
+    const muteBtn = document.getElementById("mute-btn");
+    if (muteBtn) {
+        let muted = false;
+        muteBtn.addEventListener("click", () => {
+            muted = !muted;
+            soundManager.setEnabled(!muted);
+            muteBtn.innerHTML = muted ? "&#x1F507;" : "&#x1F50A;";
+        });
+    }
 
     // Footer overlay toggle
     const footerLink = document.getElementById("bkl-footer-link");
@@ -62,5 +74,29 @@ const init = () => {
         console.error(`Container #${containerId} not found!`);
     }
 };
+
+// Button sound effects via event delegation
+const CLICK_SELECTORS = ".primary-btn, .wallet-btn, .bkl-btn-primary, .bkl-btn-outline, #delegate-send-btn";
+const HOVER_SELECTORS = CLICK_SELECTORS;
+const CANCEL_SELECTORS = ".close, .bkl-overlay-close";
+
+document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("#mute-btn")) return;
+    if (target.closest(CANCEL_SELECTORS)) {
+        soundManager.play("cancel");
+    } else if (target.closest("#play-btn")) {
+        soundManager.play("confirm");
+    } else if (target.closest(CLICK_SELECTORS)) {
+        soundManager.play("click");
+    }
+}, true);
+
+document.addEventListener("mouseenter", (e) => {
+    const target = e.target as HTMLElement;
+    if (target.matches(HOVER_SELECTORS) || target.matches(CANCEL_SELECTORS)) {
+        soundManager.play("hover");
+    }
+}, true);
 
 window.addEventListener("DOMContentLoaded", init);

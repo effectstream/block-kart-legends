@@ -618,3 +618,59 @@ const getLeaderboardEntriesIR: any = {"usedParamSet":{"start_date":true,"end_dat
 export const getLeaderboardEntries = new PreparedQuery<IGetLeaderboardEntriesParams,IGetLeaderboardEntriesResult>(getLeaderboardEntriesIR);
 
 
+/** 'GetDelegatedFromAddresses' parameters type */
+export interface IGetDelegatedFromAddressesParams {
+  resolved_address: string;
+}
+
+/** 'GetDelegatedFromAddresses' return type */
+export interface IGetDelegatedFromAddressesResult {
+  address: string | null;
+}
+
+/** 'GetDelegatedFromAddresses' query type */
+export interface IGetDelegatedFromAddressesQuery {
+  params: IGetDelegatedFromAddressesParams;
+  result: IGetDelegatedFromAddressesResult;
+}
+
+const getDelegatedFromAddressesIR: any = {"usedParamSet":{"resolved_address":true},"params":[{"name":"resolved_address","required":true,"transform":{"type":"scalar"},"locs":[{"a":137,"b":154}]}],"statement":"SELECT a.primary_address AS address\nFROM delegations d\nJOIN effectstream.accounts a ON d.account_id = a.id\nWHERE d.delegate_to_address = :resolved_address!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT a.primary_address AS address
+ * FROM delegations d
+ * JOIN effectstream.accounts a ON d.account_id = a.id
+ * WHERE d.delegate_to_address = :resolved_address!
+ * ```
+ */
+export const getDelegatedFromAddresses = new PreparedQuery<IGetDelegatedFromAddressesParams,IGetDelegatedFromAddressesResult>(getDelegatedFromAddressesIR);
+
+
+/** 'GetTotalUniqueMainWallets' parameters type */
+export type IGetTotalUniqueMainWalletsParams = void;
+
+/** 'GetTotalUniqueMainWallets' return type */
+export interface IGetTotalUniqueMainWalletsResult {
+  total: number | null;
+}
+
+/** 'GetTotalUniqueMainWallets' query type */
+export interface IGetTotalUniqueMainWalletsQuery {
+  params: IGetTotalUniqueMainWalletsParams;
+  result: IGetTotalUniqueMainWalletsResult;
+}
+
+const getTotalUniqueMainWalletsIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT COUNT(DISTINCT delegate_to)::int AS total\nFROM game_matches"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT COUNT(DISTINCT delegate_to)::int AS total
+ * FROM game_matches
+ * ```
+ */
+export const getTotalUniqueMainWallets = new PreparedQuery<IGetTotalUniqueMainWalletsParams,IGetTotalUniqueMainWalletsResult>(getTotalUniqueMainWalletsIR);
+
+

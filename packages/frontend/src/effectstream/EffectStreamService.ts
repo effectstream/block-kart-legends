@@ -33,22 +33,33 @@ export interface LeaderboardEntry {
   rank: number;
 }
 
-/** Response shape from GET /v1/game/users/:address */
+/** A single achievement definition from GET /metrics */
+export interface AchievementInfo {
+  name: string;
+  displayName: string;
+  description: string;
+  isActive: boolean;
+  iconURI?: string;
+  percentCompleted?: number;
+}
+
+/** Response shape from GET /metrics/users/:address (PRC-6) */
 export interface GameUserProfile {
   identity: {
-    queried_address: string;
-    resolved_address: string;
-    is_delegate: boolean;
-    display_name: string | null;
-  };
-  stats: {
-    rank: number | null;
-    score: number;
-    matches_played: number;
+    address: string;
+    delegatedFrom: string[];
+    displayName?: string;
   };
   achievements: string[];
-  start_date: string;
-  end_date: string;
+  channels?: Record<string, {
+    startDate?: string;
+    endDate?: string;
+    stats: {
+      score: number;
+      rank: number;
+      matchesPlayed?: number;
+    };
+  }>;
 }
 
 export class EffectStreamService {
@@ -201,14 +212,13 @@ export class EffectStreamService {
   }
 
   /**
-   * GET /v1/game/users/:address — returns whether the address is known (has account).
-   * We only expose account_id as a sentinel (1 = known, null = not found) for backward compat.
+   * GET /metrics/users/:address — returns whether the address is known (has account).
    */
   public async getAddressInfo(
     address: string,
   ): Promise<{ account_id: number | null }> {
     try {
-      const res = await fetch(`${ENV.API_URL}/v1/game/users/${encodeURIComponent(address)}`);
+      const res = await fetch(`${ENV.API_URL}/metrics/users/${encodeURIComponent(address)}`);
       return { account_id: res.ok ? 1 : null };
     } catch (e) {
       console.error("[EffectStreamService] getAddressInfo error", e);
@@ -217,13 +227,13 @@ export class EffectStreamService {
   }
 
   /**
-   * GET /v1/game/users/:address — full user profile (identity, stats, achievements).
+   * GET /metrics/users/:address — full user profile (PRC-6).
    */
   public async getGameUserByAddress(
     address: string,
   ): Promise<GameUserProfile | null> {
     try {
-      const res = await fetch(`${ENV.API_URL}/v1/game/users/${encodeURIComponent(address)}`);
+      const res = await fetch(`${ENV.API_URL}/metrics/users/${encodeURIComponent(address)}`);
       if (!res.ok) return null;
       const data: GameUserProfile = await this.safeJson(res);
       return data;
@@ -380,54 +390,65 @@ export class EffectStreamService {
   // --- Game Data (Leaderboard / Results) -----------------------
 
   /**
-   * GET /v1/game/leaderboard -> { entries: [{ rank, address, player_id, display_name, score, achievements_unlocked }], ... }
-   * Adapted to LeaderboardEntry for the UI.
+   * GET /metrics/leaderboard — PRC-6 channel leaderboard.
    */
   public async getLeaderboard(
     limit: number = 10,
   ): Promise<NetworkResponse<LeaderboardEntry[]>> {
     try {
-      const url = new URL(`${ENV.API_URL}/v1/game/leaderboard`);
+      const url = new URL(`${ENV.API_URL}/metrics/leaderboard`);
       url.searchParams.set("limit", String(limit));
       url.searchParams.set("offset", "0");
       const res = await fetch(url.toString());
       if (!res.ok) {
-        return {
-          success: true,
-          data: [],
-          timestamp: Date.now(),
-        };
+        return { success: true, data: [], timestamp: Date.now() };
       }
 
       const body: {
         entries: Array<{
           rank: number;
           address: string;
-          player_id: string;
-          display_name: string | null;
+          displayName?: string;
           score: number;
-          achievements_unlocked: number;
         }>;
       } = await this.safeJson(res);
+
       const data: LeaderboardEntry[] = (body.entries ?? []).slice(0, limit).map((row) => ({
-        playerId: row.player_id ?? row.address,
-        username: truncateAddress(row.display_name ?? row.address ?? "Anonymous"),
+        playerId: row.address,
+        username: truncateAddress(row.displayName ?? row.address ?? "Anonymous"),
         score: row.score ?? 0,
         rank: row.rank ?? 0,
       }));
 
+      return { success: true, data, timestamp: Date.now() };
+    } catch (e) {
+      console.error("[EffectStreamService] getLeaderboard error", e);
+      return { success: true, data: [], timestamp: Date.now() };
+    }
+  }
+
+  /**
+   * GET /metrics — fetch global achievements list.
+   */
+  public async getAchievements(): Promise<NetworkResponse<AchievementInfo[]>> {
+    try {
+      const res = await fetch(`${ENV.API_URL}/metrics`);
+      if (!res.ok) {
+        return { success: true, data: [], timestamp: Date.now() };
+      }
+
+      const body: {
+        achievements: AchievementInfo[];
+      } = await this.safeJson(res);
+
       return {
         success: true,
-        data,
+        data: body.achievements ?? [],
         timestamp: Date.now(),
       };
     } catch (e) {
-      console.error("[EffectStreamService] getLeaderboard error", e);
-      return {
-        success: true,
-        data: [],
-        timestamp: Date.now(),
-      };
+      console.error("[EffectStreamService] getAchievements error", e);
+      return { success: true, data: [], timestamp: Date.now() };
     }
   }
 
