@@ -52,6 +52,13 @@ const config: HardhatUserConfig = createHardhatConfig({
       url: "https://arb-sepolia.g.alchemy.com/v2/API-KEY", // Replace with your RPC URL
       accounts: ["0000000000000000000000000000000000000000000000000000000000000000"], // Private key with funds to deploy contracts.
     },
+    arbitrum: {
+      type: 'http',
+      chainId: 42161,
+      url: 'https://arb-mainnet.g.alchemy.com/v2/API-KEY',
+      accounts: ['PRIVATE-KEY'],
+    },
+
     // These are development networks.
     evmMain: {
       type: "edr-simulated",

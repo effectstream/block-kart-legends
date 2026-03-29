@@ -18,7 +18,7 @@
     "vite-plugin-node-polyfills": "^0.24.0"
   },
   "dependencies": {
-    "@paimaexample/wallets": "0.10.4",
+    "@paimaexample/wallets": "0.10.12",
     "@midnight-ntwrk/dapp-connector-api": "4.0.1",
     "@thirdweb-dev/chains": "^0.1.120",
     "@thirdweb-dev/wallets": "^2.5.39",
