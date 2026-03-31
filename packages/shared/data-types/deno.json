@@ -6,14 +6,15 @@
     "./config-dev": "./src/config.dev.ts",
     "./config-preprod": "./src/config.preprod.ts",
     "./config-mainnet": "./src/config.mainnet.ts",
-    "./grammar": "./src/grammar.ts"
+    "./grammar": "./src/grammar.ts",
+    "./validate-env": "./src/validate-env.ts"
   },
   "imports": {
-    "@paimaexample/concise": "jsr:@paimaexample/concise@0.10.15",
-    "@paimaexample/config": "jsr:@paimaexample/config@0.10.15",
-    "@paimaexample/utils": "jsr:@paimaexample/utils@0.10.15",
-    "@paimaexample/db": "jsr:@paimaexample/db@0.10.15",
-    "@paimaexample/sm": "jsr:@paimaexample/sm@0.10.15",
+    "@paimaexample/concise": "jsr:@paimaexample/concise@0.10.17",
+    "@paimaexample/config": "jsr:@paimaexample/config@0.10.17",
+    "@paimaexample/utils": "jsr:@paimaexample/utils@0.10.17",
+    "@paimaexample/db": "jsr:@paimaexample/db@0.10.17",
+    "@paimaexample/sm": "jsr:@paimaexample/sm@0.10.17",
     "viem": "npm:viem@2.37.3",
     "@sinclair/typebox": "npm:@sinclair/typebox@0.34.41"
   }

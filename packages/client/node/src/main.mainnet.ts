@@ -1,5 +1,7 @@
 // main.mainnet.ts — Production / Midnight mainnet runtime
 // - config-mainnet: Midnight only (networkId: mainnet), no EVM
+// NOTE: validate-env must be first import — runs before config modules that crash on missing vars
+import "./validate-env.mainnet.ts";
 // NOTE: onchain-runtime import is a workaround to preload the wasm module.
 import "@midnight-ntwrk/onchain-runtime";
 

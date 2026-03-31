@@ -8,6 +8,7 @@
     "build:undeployed": "tsc && vite build --mode undeployed",
     "build:testnet": "tsc && vite build --mode testnet",
     "preprod": "vite preprod",
+    "mainnet": "vite mainnet",
     "serve": "npx http-server ./dist"
   },
   "devDependencies": {
@@ -18,7 +19,7 @@
     "vite-plugin-node-polyfills": "^0.24.0"
   },
   "dependencies": {
-    "@paimaexample/wallets": "0.10.13",
+    "@paimaexample/wallets": "0.10.17",
     "@midnight-ntwrk/dapp-connector-api": "4.0.1",
     "@thirdweb-dev/chains": "^0.1.120",
     "@thirdweb-dev/wallets": "^2.5.39",

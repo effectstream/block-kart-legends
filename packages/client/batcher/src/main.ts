@@ -1,3 +1,4 @@
+import "./validate-env.ts";
 import { main, suspend } from "effection";
 import { createNewBatcher, MidnightAdapter } from "@paimaexample/batcher";
 import { config, storage } from "./config.ts";

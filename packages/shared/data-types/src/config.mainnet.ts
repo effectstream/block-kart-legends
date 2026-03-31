@@ -17,7 +17,6 @@ const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contract
 
 const mainSyncProtocolName = "mainNtp";
 let launchStartTime: number | undefined;
-let arbOneTip: number = 1;
 const EVM_RPC_URL = Deno.env.get("ARBITRUM_ONE_RPC") as string;
 if (!EVM_RPC_URL) {
   throw new Error("ARBITRUM_ONE_RPC is not set");
@@ -68,7 +67,7 @@ export const config = new ConfigBuilder()
           type: ConfigSyncProtocolType.NTP_MAIN,
           chainUri: "",
           startBlockHeight: 1,
-          pollingInterval: 500,
+          pollingInterval: 1000,
         })
       )
       .addParallel(
@@ -77,7 +76,7 @@ export const config = new ConfigBuilder()
           name: "mainEvmRPC",
           type: ConfigSyncProtocolType.EVM_RPC_PARALLEL,
           chainUri: network.rpcUrls.default.http[0],
-          startBlockHeight: arbOneTip,
+          startBlockHeight: 447453100,
           pollingInterval: 1000,
           stepSize: 9,
           confirmationDepth: 0,
@@ -88,11 +87,11 @@ export const config = new ConfigBuilder()
         (network, deployments) => ({
           name: "parallelMidnight",
           type: ConfigSyncProtocolType.MIDNIGHT_PARALLEL,
-          startBlockHeight: 1,
-          pollingInterval: 1000,
+          startBlockHeight: 171679,
+          pollingInterval: 6000,
           indexer: MIDNIGHT_INDEXER,
           indexerWs: MIDNIGHT_INDEXER_WS,
-          delayMs: 30000,
+          delayMs: 15000,
         })
       )
   )

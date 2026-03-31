@@ -1,5 +1,7 @@
 // main.preprod.ts — Preprod/staging runtime
 // - config-preprod: Arbitrum Sepolia EVM + Midnight testnet (networkId: undeployed)
+// NOTE: validate-env must be first import — runs before config modules that crash on missing vars
+import "./validate-env.preprod.ts";
 // NOTE: onchain-runtime import is a workaround to preload the wasm module.
 import "@midnight-ntwrk/onchain-runtime";
 
