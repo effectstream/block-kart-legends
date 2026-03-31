@@ -37,8 +37,8 @@ const midnightAdapterConfig0 = {
   privateStateStoreName: "private-state-midnightDataContract", // Local LevelDB store
   privateStateId: "midnightDataContractPrivateState", // On-chain contract ID (must match deploy.ts)
   walletNetworkId: networkID,
-  contractJoinTimeoutSeconds: 300, // Increase timeout to 5 minutes for private state sync
-  walletFundingTimeoutSeconds: 300, // Increase wallet funding timeout to 5 minutes
+  contractJoinTimeoutSeconds: 600, // Increase timeout to 5 minutes for private state sync
+  walletFundingTimeoutSeconds: 900, // Increase wallet funding timeout to 5 minutes
   contractName: "contract-midnight-data",
 
 };
