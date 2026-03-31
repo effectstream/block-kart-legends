@@ -20,8 +20,9 @@
     "vite-plugin-node-polyfills": "^0.24.0"
   },
   "dependencies": {
-    "@paimaexample/wallets": "0.10.17",
     "@midnight-ntwrk/dapp-connector-api": "4.0.1",
+    "@paimaexample/wallets": "0.10.17",
+    "@sentry/browser": "^10.47.0",
     "@thirdweb-dev/chains": "^0.1.120",
     "@thirdweb-dev/wallets": "^2.5.39",
     "@tweenjs/tween.js": "^25.0.0",

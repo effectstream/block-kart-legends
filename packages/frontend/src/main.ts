@@ -1,3 +1,5 @@
+import "./instrument";  // Sentry must init before all other code
+
 import { GameManager } from "./GameManager.ts";
 import {
     checkExistingDelegation,
