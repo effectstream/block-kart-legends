@@ -49,13 +49,13 @@ if (isPreprod) {
 } else if (isUndeployed) {
   chain = chains.hardhat;
 } else if (isMainnet) {
-  if (!getEnv("ARBITRUM_ONE_RPC_URL")) {
-    throw new Error("ARBITRUM_ONE_RPC_URL is not set");
+  if (!getEnv("ARBITRUM_ONE_FULL")) {
+    throw new Error("ARBITRUM_ONE_FULL is not set");
   }
   chain = chains.arbitrum;
   chain.rpcUrls = {
     default: {
-      http: [getEnv("ARBITRUM_ONE_RPC_URL")!],
+      http: [getEnv("ARBITRUM_ONE_FULL")!],
     },
   };
 } else {

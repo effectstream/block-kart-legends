@@ -198,6 +198,7 @@ export async function connectMidnightWallet(): Promise<string | null> {
       mode: WalletMode.Midnight,
       preference: { name: wallet.metadata.name },
       preferBatchedMode: false,
+      networkId: import.meta.env.VITE_MIDNIGHT_NETWORK_ID
     };
 
     const result = await walletLogin(loginOptions as any);

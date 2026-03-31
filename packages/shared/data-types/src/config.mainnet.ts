@@ -13,7 +13,7 @@ import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight
 import * as builtin from "@paimaexample/sm/builtin";
 import path from "node:path";
 
-const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contracts', 'midnight-contracts');
+const baseDir = path.join(import.meta.dirname ?? '', '..', '..', 'contracts', 'midnight-contracts');
 
 const mainSyncProtocolName = "mainNtp";
 let launchStartTime: number | undefined;
@@ -76,7 +76,7 @@ export const config = new ConfigBuilder()
           name: "mainEvmRPC",
           type: ConfigSyncProtocolType.EVM_RPC_PARALLEL,
           chainUri: network.rpcUrls.default.http[0],
-          startBlockHeight: 447453100,
+          startBlockHeight: 447477615,
           pollingInterval: 1000,
           stepSize: 9,
           confirmationDepth: 0,
@@ -87,11 +87,12 @@ export const config = new ConfigBuilder()
         (network, deployments) => ({
           name: "parallelMidnight",
           type: ConfigSyncProtocolType.MIDNIGHT_PARALLEL,
-          startBlockHeight: 171679,
+          startBlockHeight: 172708,
           pollingInterval: 6000,
           indexer: MIDNIGHT_INDEXER,
           indexerWs: MIDNIGHT_INDEXER_WS,
-          delayMs: 15000,
+          delayMs: 60000,
+          stepSize: 2,	  
         })
       )
   )
@@ -120,7 +121,8 @@ export const config = new ConfigBuilder()
             "contract-midnight-data",
             {
               contractFileName: "contract-midnight-data.json",
-              baseDir
+              baseDir,
+	            networkId: 'mainnet',
             }
           ).contractAddress,
           stateMachinePrefix: "event_midnight",

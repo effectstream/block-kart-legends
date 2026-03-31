@@ -20,7 +20,7 @@ if (midnightNetworkConfig.id !== 'preprod') {
   throw new Error("Invalid midnight network id");
 }
 
-const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contracts', 'midnight-contracts');
+const baseDir = path.join(import.meta.dirname ?? '', '..', '..', 'contracts', 'midnight-contracts');
 
 /**
  * Let check if the db.
@@ -30,7 +30,7 @@ const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'contract
 
 const mainSyncProtocolName = "mainNtp";
 let launchStartTime: number | undefined;
-let arbSepoliaTip: number = 230666729;
+let arbSepoliaTip: number = 253116239;
 const EVM_RPC_URL = Deno.env.get("ARBITRUM_SEPOLIA_RPC") as string;
 if (!EVM_RPC_URL) {
   throw new Error("ARBITRUM_SEPOLIA_RPC is not set");
@@ -85,7 +85,7 @@ export const config = new ConfigBuilder()
           chainUri: network.rpcUrls.default.http[0],
           startBlockHeight: arbSepoliaTip,
           pollingInterval: 1000, // poll quickly to react fast
-          stepSize: 9,
+          stepSize: 1000,
           confirmationDepth: 0,
         })
       )
@@ -94,7 +94,7 @@ export const config = new ConfigBuilder()
         (network, deployments) => ({
           name: "parallelMidnight",
           type: ConfigSyncProtocolType.MIDNIGHT_PARALLEL,
-          startBlockHeight: 1,
+          startBlockHeight: 46463,
           pollingInterval: 1000,
           indexer: MIDNIGHT_INDEXER,
           indexerWs: MIDNIGHT_INDEXER_WS,
@@ -127,12 +127,13 @@ export const config = new ConfigBuilder()
             "contract-midnight-data",
             {
               contractFileName: "contract-midnight-data.json",
-              baseDir
+              baseDir,
+	            networkId: 'preprod' 
             }
           ).contractAddress,
           stateMachinePrefix: "event_midnight",
           contract: { ledger: midnightDataContract.ledger },
-          networkId: 0,
+          networkId: 'preprod',
         })
       )
   )

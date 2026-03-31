@@ -2,22 +2,23 @@
 // - Launches Midnight only (no local EVM node — uses remote Arbitrum Sepolia RPC)
 // - Batcher depends on Midnight contract only
 // - Uses EFFECTSTREAM_ENV=preprod → loads .env.preprod
+import { ENV } from "@paimaexample/utils/node-env";
 import { OrchestratorConfig, start } from "@paimaexample/orchestrator";
 import { ComponentNames } from "@paimaexample/log";
 import { Value } from "@sinclair/typebox/value";
 
-const customProcesses = [
+const customProcesses: any[] = [
   /** BATCHER-BLOCK */
-  {
-    name: "batcher",
-    args: ["task", "-f", "@kart-legends/batcher", "start"],
-    waitToExit: false,
-    type: "system-dependency",
-    link: "http://localhost:3334",
-    stopProcessAtPort: [3334],
-    dependsOn: [
-    ],
-  },
+ // {
+ //   name: "batcher",
+ //   args: ["task", "-f", "@kart-legends/batcher", "start"],
+ //   waitToExit: false,
+ //   type: "system-dependency",
+ //   link: "http://localhost:3334",
+ //   stopProcessAtPort: [3334],
+ //   dependsOn: [
+ //   ],
+ // },
   /** BATCHER-BLOCK */
 ];
 
@@ -33,7 +34,7 @@ const config = Value.Parse(OrchestratorConfig, {
 
   // Launch my processes
   processesToLaunch: [
-    ...customProcesses,
+ //   ...customProcesses,
   ],
 });
 

@@ -13,7 +13,11 @@ const {
   contractInfo: contractInfo0,
   contractAddress: contractAddress0,
   zkConfigPath: zkConfigPath0,
-} = readMidnightContract("contract-midnight-data", { contractFileName: "contract-midnight-data.json", baseDir });
+} = readMidnightContract("contract-midnight-data", { 
+  contractFileName: "contract-midnight-data.json", 
+  baseDir, 
+  networkId: midnightNetworkConfig.id
+ });
 /** MIDNIGHT-READ-CONTRACT-BLOCK  */
 
 const indexer = midnightNetworkConfig.indexer;

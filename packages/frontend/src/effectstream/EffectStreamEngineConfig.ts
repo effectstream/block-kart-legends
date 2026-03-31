@@ -1,8 +1,9 @@
 import { PaimaEngineConfig } from "@paimaexample/wallets";
-import { hardhat, arbitrumSepolia } from "viem/chains";
+import { hardhat, arbitrum, arbitrumSepolia } from "viem/chains";
 
 const chains: Record<string, any> = {
   hardhat,
+  arbitrum,
   arbitrumSepolia,
 };
 
