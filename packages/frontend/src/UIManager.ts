@@ -878,6 +878,8 @@ export class UIManager {
             modal.style.display = "none";
             console.log("Play button clicked");
             cb();
+            // Reset after a short delay so the button works again for the next race
+            setTimeout(() => { proceeding = false; }, 1000);
         };
 
         continueBtn.onclick = () => {
