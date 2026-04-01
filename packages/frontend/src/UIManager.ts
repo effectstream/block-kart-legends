@@ -867,10 +867,36 @@ export class UIManager {
 
     public onPlayClick(cb: () => void) {
         const btn = document.getElementById("play-btn");
+        const modal = document.getElementById("no-items-modal")!;
+        const continueBtn = document.getElementById("btn-no-items-continue")!;
+        const backBtn = document.getElementById("btn-no-items-back")!;
+
+        let proceeding = false;
+        const proceedWithPlay = () => {
+            if (proceeding) return;
+            proceeding = true;
+            modal.style.display = "none";
+            console.log("Play button clicked");
+            cb();
+        };
+
+        continueBtn.onclick = () => {
+            soundManager.play("click");
+            proceedWithPlay();
+        };
+        backBtn.onclick = () => {
+            soundManager.play("cancel");
+            modal.style.display = "none";
+        };
+
         if (btn) {
             btn.onclick = () => {
-                console.log("Play button clicked");
-                cb();
+                const hasItems = this.slots.some((s) => s !== null);
+                if (!hasItems) {
+                    modal.style.display = "flex";
+                    return;
+                }
+                proceedWithPlay();
             };
         }
     }

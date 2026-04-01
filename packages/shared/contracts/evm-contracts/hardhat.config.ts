@@ -56,7 +56,7 @@ const config: HardhatUserConfig = createHardhatConfig({
       type: 'http',
       chainId: 42161,
       url: 'https://arb-mainnet.g.alchemy.com/v2/API-KEY',
-      accounts: ['PRIVATE-KEY'],
+      accounts: ['0000000000000000000000000000000000000000000000000000000000000000'],
     },
 
     // These are development networks.

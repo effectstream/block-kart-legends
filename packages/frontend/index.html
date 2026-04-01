@@ -17,7 +17,10 @@
         <h1>Block Kart Legends</h1>
         <div style="margin-left: auto; display: flex; gap: 10px;">
             <button id="btn-set-name" class="wallet-btn" style="display: none; position: static; transform: none; pointer-events: none; cursor: default;">SET PLAYER NAME</button>
-            <button id="connect-wallet-btn" class="wallet-btn" style="position: static; transform: none;">Connect Wallet</button>
+            <span class="wallet-btn-wrapper">
+              <button id="connect-wallet-btn" class="wallet-btn" style="position: static; transform: none;">Connect Wallet</button>
+              <div class="wallet-tooltip">Connect Your Midnight Wallet to Save Your Scores!</div>
+            </span>
             <button id="mute-btn" class="wallet-btn" style="position: static; transform: none; min-width: auto; padding: 6px 10px; font-size: 1.1em;" title="Toggle Sound">&#x1F50A;</button>
         </div>
       </header>
@@ -65,6 +68,17 @@
         </div>
       </div>
       
+      <!-- No Items Confirmation Modal -->
+      <div id="no-items-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="text-align: center;">
+            <h2 style="font-size: 1.1em;">Are you sure you want to start the race with No items?</h2>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button id="btn-no-items-back" class="primary-btn" style="margin: 0; font-size: 0.9em; background: #555; border: 1px solid #777; box-shadow: none;">Back</button>
+                <button id="btn-no-items-continue" class="primary-btn" style="margin: 0; font-size: 0.9em;">Continue</button>
+            </div>
+        </div>
+      </div>
+
       <div id="content-wrapper">
         <aside id="sidebar">
           <h3 id="sidebar-title">Leaderboard</h3>
@@ -94,19 +108,19 @@
               
               <div class="stats-grid">
                 <div class="stats-control">
-                  <label>Speed: <input type="range" min="1" max="10" value="5" id="stat-speed" /> <span id="val-speed">5</span></label>
+                  <label><span class="stat-name">Speed: <div class="stat-tooltip">Your car's top speed on straight roads</div></span> <input type="range" min="1" max="10" value="5" id="stat-speed" /> <span id="val-speed">5</span></label>
                 </div>
                 <div class="stats-control">
-                  <label>Accel: <input type="range" min="1" max="10" value="5" id="stat-accel" /> <span id="val-accel">5</span></label>
+                  <label><span class="stat-name">Accel: <div class="stat-tooltip">How quickly your car speeds up and slows down</div></span> <input type="range" min="1" max="10" value="5" id="stat-accel" /> <span id="val-accel">5</span></label>
                 </div>
                 <div class="stats-control">
-                  <label>Weight: <input type="range" min="1" max="10" value="5" id="stat-weight" /> <span id="val-weight">5</span></label>
+                  <label><span class="stat-name">Weight: <div class="stat-tooltip">Heavier cars keep momentum longer and resist item effects</div></span> <input type="range" min="1" max="10" value="5" id="stat-weight" /> <span id="val-weight">5</span></label>
                 </div>
                 <div class="stats-control">
-                  <label>Handling: <input type="range" min="1" max="10" value="5" id="stat-handling" /> <span id="val-handling">5</span></label>
+                  <label><span class="stat-name">Handling: <div class="stat-tooltip">How well your car takes corners without losing speed</div></span> <input type="range" min="1" max="10" value="5" id="stat-handling" /> <span id="val-handling">5</span></label>
                 </div>
                 <div class="stats-control">
-                  <label>Traction: <input type="range" min="1" max="10" value="5" id="stat-traction" /> <span id="val-traction">5</span></label>
+                  <label><span class="stat-name">Traction: <div class="stat-tooltip">How well your tires grip the road, affecting overall performance</div></span> <input type="range" min="1" max="10" value="5" id="stat-traction" /> <span id="val-traction">5</span></label>
                 </div>
               </div>
               

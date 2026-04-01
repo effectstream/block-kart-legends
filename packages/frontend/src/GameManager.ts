@@ -461,6 +461,62 @@ export class GameManager {
         this.loadAchievements();
     }
 
+    private showRaceStartMessage() {
+        const goodLuck = [
+            "Sit back and enjoy the show!",
+            "Let the engine roar!",
+            "Time to spectate!",
+            "Grab some popcorn!",
+            "Relax and enjoy the ride!",
+            "May the best kart win!",
+            "Ready, set, GO!",
+            "The race is on! Good luck!",
+            "Vroom vroom! Here we go!",
+            "Start your engines!",
+            "The green light is on!",
+            "And they're off!",
+            "Let the chaos begin!",
+            "Full speed ahead!",
+            "Race day is here!",
+        ];
+        const noButtons = [
+            "No buttons needed!",
+            "Your kart drives itself! Just watch and cheer!",
+            "No input required!",
+            "The race runs on its own!",
+            "No pressing needed!",
+            "This race is fully automated!",
+            "Hands off the wheel! Your kart's got this!",
+            "Your setup does the driving!",
+            "Zero clicks required, 100% spectating!",
+            "Auto-pilot engaged! Nothing to press!",
+            "Your kart has a mind of its own!",
+            "No tapping, no clicking, just vibes!",
+            "Everything's handled! Just sit tight!",
+            "The AI takes the wheel from here!",
+            "Your strategy was the only input needed!",
+        ];
+        const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+        const message = `${pick(goodLuck)}\n${pick(noButtons)}`;
+
+        const gameArea = document.getElementById("game-area");
+        if (!gameArea) return;
+
+        const overlay = document.createElement("div");
+        overlay.className = "race-start-message";
+
+        const text = document.createElement("div");
+        text.className = "race-start-message-text";
+        text.innerText = message;
+        overlay.appendChild(text);
+
+        gameArea.appendChild(overlay);
+
+        overlay.addEventListener("animationend", () => {
+            overlay.remove();
+        });
+    }
+
     public async startRace(playerConfig: PlayerConfig) {
         if (DEBUG) {
             console.log("startRace called", playerConfig);
@@ -562,6 +618,9 @@ export class GameManager {
         this.hasPlayerFinished = false;
 
         this.uiManager.hideAllScreens();
+
+        // Show race start message
+        this.showRaceStartMessage();
 
         // Create Grass
         if (this.playerCar) {
