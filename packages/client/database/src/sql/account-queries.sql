@@ -38,17 +38,33 @@ JOIN delegations d ON addr.account_id = d.account_id
 WHERE addr.address = :address!;
 
 /* @name GetResolvedIdentityByAddress */
-SELECT
-  addr.account_id AS account_id,
-  addr.address AS queried_address,
-  COALESCE(d.delegate_to_address, a.primary_address) AS resolved_address,
-  (addr.address <> COALESCE(d.delegate_to_address, a.primary_address)) AS is_delegate,
-  COALESCE(u.name, COALESCE(d.delegate_to_address, a.primary_address, addr.address)) AS display_name
-FROM effectstream.addresses addr
-LEFT JOIN effectstream.accounts a ON addr.account_id = a.id
-LEFT JOIN delegations d ON addr.account_id = d.account_id
-LEFT JOIN user_game_state u ON a.id = u.account_id
-WHERE addr.address = :address!;
+(
+  SELECT
+    addr.account_id AS account_id,
+    addr.address AS queried_address,
+    COALESCE(d.delegate_to_address, a.primary_address) AS resolved_address,
+    (addr.address <> COALESCE(d.delegate_to_address, a.primary_address)) AS is_delegate,
+    COALESCE(u.name, COALESCE(d.delegate_to_address, a.primary_address, addr.address)) AS display_name
+  FROM effectstream.addresses addr
+  LEFT JOIN effectstream.accounts a ON addr.account_id = a.id
+  LEFT JOIN delegations d ON addr.account_id = d.account_id
+  LEFT JOIN user_game_state u ON a.id = u.account_id
+  WHERE addr.address = :address!
+)
+UNION ALL
+(
+  SELECT
+    d.account_id AS account_id,
+    :address! AS queried_address,
+    d.delegate_to_address AS resolved_address,
+    false AS is_delegate,
+    COALESCE(u.name, d.delegate_to_address) AS display_name
+  FROM delegations d
+  LEFT JOIN user_game_state u ON d.account_id = u.account_id
+  WHERE d.delegate_to_address = :address!
+  AND NOT EXISTS (SELECT 1 FROM effectstream.addresses ea WHERE ea.address = :address!)
+)
+LIMIT 1;
 
 /* @name GetLeaderboard */
 SELECT u.balance as score, COALESCE(u.name, a.primary_address) as username, a.primary_address as wallet

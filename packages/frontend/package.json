@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@midnight-ntwrk/dapp-connector-api": "4.0.1",
-    "@paimaexample/wallets": "0.10.17",
+    "@paimaexample/wallets": "0.10.23",
     "@sentry/browser": "^10.47.0",
     "@thirdweb-dev/chains": "^0.1.120",
     "@thirdweb-dev/wallets": "^2.5.39",
