@@ -161,10 +161,12 @@ stm.addStateTransition("delegate", function* (data) {
     return;
   }
 
+  console.log(`[delegate] signerAddress=${data.signerAddress} signerAddressType=${data.signerAddressType}`);
   const accountId = yield* getAccountId(
     data.signerAddress,
     data.signerAddressType,
   );
+  console.log(`[delegate] resolved accountId=${accountId} for signer=${data.signerAddress}`);
   if (accountId === null) return;
 
   console.log(

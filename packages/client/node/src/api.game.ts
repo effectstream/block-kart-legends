@@ -144,7 +144,7 @@ export const apiGame = async (
       name.startsWith("mn_")
     );
     if (looksLikeAddress) {
-      name = undefined;
+      name = null;
     }
 
     reply.send({

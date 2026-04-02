@@ -324,25 +324,24 @@ export function initWalletUI() {
           delegateInput.value = address;
         }
 
-        // Check if this address is already delegated
+        // Check if THIS local wallet is already delegated to the MN address
         const api = new EffectStreamService();
+        let thisWalletDelegated = false;
         try {
-          const user = await api.getGameUserByAddress(address);
-          if ((user?.identity?.delegatedFrom?.length ?? 0) > 0) {
-            connectWalletBtn.textContent = "WALLET CONNECTED";
-          } else {
-            connectWalletBtn.textContent = "WALLET CONNECTED";
-            // Show the delegation modal so user can delegate
-            if (walletModal) {
-              walletModal.style.display = 'flex';
-            }
+          let local = localWallet;
+          if (!local) local = await initializeLocalWallet();
+          if (local) {
+            const user = await api.getGameUserByAddress(address);
+            const delegatedFrom = user?.identity?.delegatedFrom ?? [];
+            thisWalletDelegated = delegatedFrom.includes(local.walletAddress);
           }
         } catch (e) {
-          connectWalletBtn.textContent = "WALLET CONNECTED";
-          // Show modal for delegation
-          if (walletModal) {
-            walletModal.style.display = 'flex';
-          }
+          // Not found — treat as not delegated
+        }
+
+        connectWalletBtn.textContent = "WALLET CONNECTED";
+        if (!thisWalletDelegated && walletModal) {
+          walletModal.style.display = 'flex';
         }
 
         // Update the name button with address/delegated address
