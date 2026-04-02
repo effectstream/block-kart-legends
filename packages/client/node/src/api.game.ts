@@ -115,7 +115,7 @@ export const apiGame = async (
         accountId: 0,
         balance: 0,
         lastLogin: Date.now(),
-        name: `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
+        name: undefined,
       });
       return;
     }
@@ -130,14 +130,21 @@ export const apiGame = async (
         accountId: 0,
         balance: 0,
         lastLogin: Date.now(),
-        name: `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
+        name: undefined,
       });
       return;
     }
 
     let name = profile.username;
-    if (name === walletAddress) {
-      name = `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+    // Detect raw wallet addresses (EVM 0x… or Midnight mn_…) and don't
+    // treat them as a real player name — return undefined so the frontend
+    // can show an appropriate fallback.
+    const looksLikeAddress = name && (
+      /^0x[0-9a-fA-F]{40}$/.test(name) ||
+      name.startsWith("mn_")
+    );
+    if (looksLikeAddress) {
+      name = undefined;
     }
 
     reply.send({
@@ -146,7 +153,7 @@ export const apiGame = async (
       lastLogin: profile.last_login_at
         ? new Date(profile.last_login_at).getTime()
         : Date.now(),
-      name: name || `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
+      name: name || undefined,
     });
   });
 };

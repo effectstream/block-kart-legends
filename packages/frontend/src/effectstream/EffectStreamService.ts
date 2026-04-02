@@ -160,14 +160,13 @@ export class EffectStreamService {
     try {
       const res = await fetch(`${ENV.API_URL}/api/user/${walletAddress}`);
       if (!res.ok) {
-        const fallbackName = truncateAddress(walletAddress);
         return {
           id: "0",
-          username: fallbackName,
+          username: truncateAddress(walletAddress),
           level: 1,
           coins: 0,
           stats: { totalRaces: 0, wins: 0, bestTime: 0 },
-          name: fallbackName,
+          name: undefined,
           balance: 0,
         };
       }
@@ -197,15 +196,13 @@ export class EffectStreamService {
       };
     } catch (e) {
       console.error("[EffectStreamService] getUserProfile error", e);
-      const fallbackName = walletAddress.slice(0, 6) + "..." +
-        walletAddress.slice(-4);
       return {
         id: "0",
-        username: fallbackName,
+        username: truncateAddress(walletAddress),
         level: 1,
         coins: 0,
         stats: { totalRaces: 0, wins: 0, bestTime: 0 },
-        name: fallbackName,
+        name: undefined,
         balance: 0,
       };
     }

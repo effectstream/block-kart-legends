@@ -119,6 +119,7 @@ export async function updateSetNameButtonLabel() {
   if (!btnSetName) return;
 
   btnSetName.style.display = 'inline-block';
+  console.log("[updateSetNameButtonLabel] START");
 
   let wallet = getConnectedWallet();
   let local = localWallet;
@@ -131,6 +132,7 @@ export async function updateSetNameButtonLabel() {
   // Determine the effective address (Account Primary Address if available)
   let effectiveAddress: string | null = null;
   const currentAddress = midnightAddress || (wallet && wallet.walletAddress) || (local && local.walletAddress);
+  console.log("[updateSetNameButtonLabel] midnightAddress:", midnightAddress, "wallet:", wallet?.walletAddress, "local:", local?.walletAddress, "currentAddress:", currentAddress);
 
   if (currentAddress) {
     try {
@@ -157,7 +159,11 @@ export async function updateSetNameButtonLabel() {
   let nameFound = false;
   try {
     const profile = await api.getUserProfile(effectiveAddress);
-    if (profile && profile.name) {
+    const nameIsAddress = profile?.name && (
+      /^0x[0-9a-fA-F]{40}$/.test(profile.name) || profile.name.startsWith("mn_")
+    );
+    console.log("[updateSetNameButtonLabel] profile.name:", profile?.name, "nameIsAddress:", nameIsAddress, "effectiveAddress:", effectiveAddress);
+    if (profile && profile.name && !nameIsAddress) {
       btnSetName.textContent = profile.name;
       nameFound = true;
     }
@@ -167,9 +173,12 @@ export async function updateSetNameButtonLabel() {
 
   if (nameFound) return;
 
-  // 2. Use Effective Address (truncated, full on hover)
-  btnSetName.textContent = truncateAddress(effectiveAddress);
-  btnSetName.title = effectiveAddress;
+  // 2. Use connected wallet address (truncated, full on hover)
+  //    Prefer the user-facing wallet (Midnight or EVM) over the internal local wallet
+  const displayAddress = midnightAddress || (wallet && wallet.walletAddress) || effectiveAddress;
+  console.log("[updateSetNameButtonLabel] NO NAME — displayAddress:", displayAddress);
+  btnSetName.textContent = truncateAddress(displayAddress);
+  btnSetName.title = displayAddress;
 }
 
 /**
