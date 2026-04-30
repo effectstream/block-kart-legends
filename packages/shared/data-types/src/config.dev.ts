@@ -96,6 +96,7 @@ export const config = new ConfigBuilder()
           startBlockHeight: 1,
           pollingInterval: 500,
           confirmationDepth: 0,
+          stepSize: 30,
         })
       )
       .addParallel(
