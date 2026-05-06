@@ -13,6 +13,16 @@ import { soundManager } from "./SoundManager.ts";
 console.log("Block Kart Legends started");
 
 const init = () => {
+    const isGameFrame = new URLSearchParams(window.location.search).get("game_frame") === "true";
+    if (isGameFrame) {
+        for (const id of ["game-header", "sidebar", "bkl-footer"]) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = "none";
+        }
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+    }
+
     // Initialize Wallet UI and Local Wallet
     initWalletUI();
     initializeLocalWallet().then(async (wallet) => {
