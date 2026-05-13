@@ -894,3 +894,16 @@ td {
   text-align: center;
   max-width: 80%;
 }
+
+body.game-frame #game-header h1,
+body.game-frame #sidebar,
+body.game-frame #bkl-footer,
+body.game-frame #mute-btn {
+  display: none !important;
+}
+
+body.hide-connect-wallet #connect-wallet-btn,
+body.hide-connect-wallet .wallet-btn-wrapper,
+body.hide-connect-wallet #btn-set-name {
+  display: none !important;
+}
