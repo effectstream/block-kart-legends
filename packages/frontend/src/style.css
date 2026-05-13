@@ -902,8 +902,6 @@ body.game-frame #mute-btn {
   display: none !important;
 }
 
-body.hide-connect-wallet #connect-wallet-btn,
-body.hide-connect-wallet .wallet-btn-wrapper,
-body.hide-connect-wallet #btn-set-name {
+body.hide-connect-wallet #game-header {
   display: none !important;
 }
