@@ -895,10 +895,8 @@ td {
   max-width: 80%;
 }
 
-body.game-frame #game-header h1,
 body.game-frame #sidebar,
-body.game-frame #bkl-footer,
-body.game-frame #mute-btn {
+body.game-frame #bkl-footer {
   display: none !important;
 }
 
