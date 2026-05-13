@@ -13,14 +13,14 @@ import { soundManager } from "./SoundManager.ts";
 console.log("Block Kart Legends started");
 
 const init = () => {
-    const isGameFrame = new URLSearchParams(window.location.search).get("game_frame") === "true";
-    if (isGameFrame) {
-        for (const id of ["game-header", "sidebar", "bkl-footer"]) {
-            const el = document.getElementById(id);
-            if (el) el.style.display = "none";
-        }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("game_frame") === "true") {
+        document.body.classList.add("game-frame");
         document.documentElement.style.overflow = "hidden";
         document.body.style.overflow = "hidden";
+    }
+    if (params.get("hide_connect_wallet") === "true") {
+        document.body.classList.add("hide-connect-wallet");
     }
 
     // Initialize Wallet UI and Local Wallet
