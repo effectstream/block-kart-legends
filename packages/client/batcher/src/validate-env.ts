@@ -1,10 +1,18 @@
 import { validateEnv, type EnvVarSpec } from "@kart-legends/data-types/validate-env";
 
-const env = Deno.env.get("EFFECTSTREAM_ENV");
+const env = process.env.EFFECTSTREAM_ENV;
+
+const hardhatDevKey =
+  "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
 
 const specs: EnvVarSpec[] = [
   { name: "EFFECTSTREAM_ENV", required: true, secret: false },
-  { name: "BATCHER_EVM_SECRET_KEY", required: true, secret: true },
+  {
+    name: "BATCHER_EVM_SECRET_KEY",
+    required: true,
+    secret: true,
+    ...(env === "dev" ? { defaultValue: hardhatDevKey } : {}),
+  },
   { name: "BATCHER_PORT", required: false, secret: false, defaultValue: "3334" },
 ];
 

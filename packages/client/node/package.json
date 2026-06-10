@@ -1,7 +1,45 @@
 {
-  "dependencies": {
-    "@paimaexample/explorer": "0.11.3",
-    "http-server": "^14.1.1"
+  "name": "@kart-legends/node",
+  "version": "0.3.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/main.dev.ts"
   },
-  "devDependencies": {}
+  "scripts": {
+    "check": "bun x tsc --noEmit -p tsconfig.check.json",
+    "node:start:dev": "bun --inspect run src/main.dev.ts",
+    "node:start:preprod": "bun --inspect run src/main.preprod.ts",
+    "node:start:mainnet": "bun --inspect run src/main.mainnet.ts",
+    "dev": "EFFECTSTREAM_ENV=dev NODE_ENV=development bun run src/main.dev.ts",
+    "preprod": "EFFECTSTREAM_ENV=preprod NODE_ENV=development bun run src/main.preprod.ts",
+    "mainnet": "EFFECTSTREAM_ENV=mainnet NODE_ENV=production bun run src/main.mainnet.ts",
+    "test": "bun run scripts/e2e.test.ts"
+  },
+  "dependencies": {
+    "@effectstream/concise": "0.100.20",
+    "@effectstream/config": "0.100.20",
+    "@effectstream/coroutine": "0.100.20",
+    "@effectstream/db": "0.100.20",
+    "@effectstream/log": "0.100.20",
+    "@effectstream/midnight-contracts": "0.100.20",
+    "@effectstream/orchestrator": "0.100.20",
+    "@effectstream/runtime": "0.100.20",
+    "@effectstream/sm": "0.100.20",
+    "@effectstream/utils": "0.100.20",
+    "@kart-legends/data-types": "workspace:*",
+    "@kart-legends/database": "workspace:*",
+    "@kart-legends/evm-contracts": "workspace:*",
+    "@kart-legends/game-simulation": "workspace:*",
+    "@kart-legends/midnight-contracts": "workspace:*",
+    "@kart-legends/midnight-contract-midnight-data": "workspace:*",
+    "@midnight-ntwrk/onchain-runtime": "npm:@midnight-ntwrk/onchain-runtime-v3@3.0.0",
+    "@sinclair/typebox": "^0.34.30",
+    "effection": "^3.5.0",
+    "fastify": "^5.4.0",
+    "pg": "^8.14.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.11"
+  }
 }

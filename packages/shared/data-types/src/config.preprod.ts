@@ -1,16 +1,16 @@
 import { contractAddressesEvmMain } from "@kart-legends/evm-contracts";
-import { readMidnightContract } from "@paimaexample/midnight-contracts/read-contract";
+import { readMidnightContract } from "@effectstream/midnight-contracts/read-contract";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 
 import {
   ConfigBuilder,
   ConfigNetworkType,
   ConfigSyncProtocolType,
-} from "@paimaexample/config";
+} from "@effectstream/config";
 import { arbitrumSepolia } from "viem/chains";
-import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
+import { midnightNetworkConfig } from "@effectstream/midnight-contracts/midnight-env";
 
-import * as builtin from "@paimaexample/sm/builtin";
+import * as builtin from "@effectstream/sm/builtin";
 import path from "node:path";
 
 const MIDNIGHT_INDEXER = midnightNetworkConfig.indexer;
@@ -31,7 +31,7 @@ const baseDir = path.join(import.meta.dirname ?? '', '..', '..', 'contracts', 'm
 const mainSyncProtocolName = "mainNtp";
 let launchStartTime: number | undefined;
 let arbSepoliaTip: number = 253116239;
-const EVM_RPC_URL = Deno.env.get("ARBITRUM_SEPOLIA_RPC") as string;
+const EVM_RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC as string;
 if (!EVM_RPC_URL) {
   throw new Error("ARBITRUM_SEPOLIA_RPC is not set");
 }
@@ -108,7 +108,7 @@ export const config = new ConfigBuilder()
         (syncProtocols) => syncProtocols.mainEvmRPC,
         (network, deployments, syncProtocol) => ({
           name: "primitive_effectstreaml2",
-          type: builtin.PrimitiveTypeEVMPaimaL2,
+          type: builtin.PrimitiveTypeEVMEffectstreamL2,
           startBlockHeight: 0,
           contractAddress:
             contractAddressesEvmMain().chain421614[

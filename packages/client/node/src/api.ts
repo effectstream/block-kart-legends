@@ -1,6 +1,6 @@
 import type { Pool } from "pg";
-import type { StartConfigApiRouter } from "@paimaexample/runtime";
-import type fastify from "fastify";
+import type { StartConfigApiRouter } from "@effectstream/runtime";
+import type { FastifyInstance } from "fastify";
 import { apiCommon } from "./api.common.ts";
 import { apiGame } from "./api.game.ts";
 /**
@@ -10,7 +10,7 @@ import { apiGame } from "./api.game.ts";
  * @param dbConn - The database connection.
  */
 export const apiRouter: StartConfigApiRouter = async function (
-  server: fastify.FastifyInstance,
+  server: FastifyInstance,
   dbConn: Pool,
 ): Promise<void> {
   // await Promise.resolve();

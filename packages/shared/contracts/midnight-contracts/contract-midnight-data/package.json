@@ -1,15 +1,17 @@
 {
   "name": "@kart-legends/midnight-contract-midnight-data",
+  "version": "0.3.0",
+  "type": "module",
   "exports": {
     ".": "./src/_index.ts",
     "./witnesses": "./src/witnesses.ts",
     "./contract": "./src/managed/midnight-data/contract/index.js"
   },
-  "tasks": {
+  "scripts": {
     "compact": "compact compile +0.30.0 src/midnight-data.compact src/managed/midnight-data",
-    "contract:compile": "deno task compact"
+    "contract:compile": "bun run compact"
   },
-  "imports": {
-    "vitest": "npm:vitest@^3.2.4"
+  "devDependencies": {
+    "vitest": "^3.2.4"
   }
 }

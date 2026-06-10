@@ -1,0 +1,25 @@
+{
+  "name": "@kart-legends/data-types",
+  "version": "0.3.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./config-dev": "./src/config.dev.ts",
+    "./config-preprod": "./src/config.preprod.ts",
+    "./config-mainnet": "./src/config.mainnet.ts",
+    "./grammar": "./src/grammar.ts",
+    "./validate-env": "./src/validate-env.ts"
+  },
+  "dependencies": {
+    "@effectstream/concise": "0.100.20",
+    "@effectstream/config": "0.100.20",
+    "@effectstream/db": "0.100.20",
+    "@effectstream/midnight-contracts": "0.100.20",
+    "@effectstream/sm": "0.100.20",
+    "@effectstream/utils": "0.100.20",
+    "@kart-legends/evm-contracts": "workspace:*",
+    "@kart-legends/midnight-contract-midnight-data": "workspace:*",
+    "@sinclair/typebox": "0.34.41",
+    "viem": "2.37.3"
+  }
+}

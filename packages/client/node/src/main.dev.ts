@@ -5,14 +5,14 @@ import "./validate-env.dev.ts";
 // NOTE: onchain-runtime import is a workaround to preload the wasm module.
 import "@midnight-ntwrk/onchain-runtime";
 
-import { init, start } from "@paimaexample/runtime";
+import { init, start } from "@effectstream/runtime";
 import { main, suspend } from "effection";
 import { config } from "@kart-legends/data-types/config-dev";
 import {
   type SyncProtocolWithNetwork,
   toSyncProtocolWithNetwork,
   withEffectstreamStaticConfig,
-} from "@paimaexample/config";
+} from "@effectstream/config";
 import { migrationTable } from "@kart-legends/database";
 import { gameStateTransitions } from "./state-machine.ts";
 import { apiRouter } from "./api.ts";

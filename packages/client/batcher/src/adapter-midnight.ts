@@ -1,12 +1,12 @@
-import { type DefaultBatcherInput, MidnightAdapter } from "@paimaexample/batcher";
-import { readMidnightContract } from "@paimaexample/midnight-contracts/read-contract";
+import { type DefaultBatcherInput, MidnightAdapter } from "@effectstream/batcher-sdk";
+import { readMidnightContract } from "@effectstream/midnight-contracts/read-contract";
 import * as midnightDataContractInfo from "@kart-legends/midnight-contract-midnight-data";
-// import { ENV } from "@paimaexample/utils/node-env";
-import { getEnv } from "@paimaexample/utils";
+// import { ENV } from "@effectstream/utils/node-env";
+import { getEnv } from "@effectstream/utils";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
-import { CryptoManager } from "@paimaexample/crypto";
+import { CryptoManager } from "@effectstream/crypto";
 import path from "node:path";
-import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
+import { midnightNetworkConfig } from "@effectstream/midnight-contracts/midnight-env";
 const baseDir = path.join(import.meta.dirname ?? '', '..', '..', '..', 'shared', 'contracts', 'midnight-contracts');
 
 const {

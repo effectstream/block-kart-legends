@@ -1,9 +1,9 @@
 import { ItemPlacement, VehicleStats } from "../simulation/types.ts";
-import { sendTransaction } from "@paimaexample/wallets";
+import { sendTransaction } from "@effectstream/wallets";
 import { EngineConfig } from "./EffectStreamEngineConfig.ts";
 import { getLocalWallet, initializeLocalWallet, truncateAddress } from "./EffectStreamWallet.ts";
 import { showToast } from "../Toast.ts";
-import { accountPayload_ as accountPayload } from "@paimaexample/wallets";
+import { accountPayload_ as accountPayload } from "@effectstream/wallets";
 import { ENV } from "./EffectStreamEngineConfig.ts";
 
 // types for the service

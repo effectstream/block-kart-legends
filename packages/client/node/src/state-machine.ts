@@ -1,8 +1,8 @@
-import { PaimaSTM } from "@paimaexample/sm";
+import { Stm } from "@effectstream/sm";
 import { grammar } from "@kart-legends/data-types/grammar";
-import type { BaseStfInput } from "@paimaexample/sm";
-import type { StartConfigGameStateTransitions } from "@paimaexample/runtime";
-import { type SyncStateUpdateStream, World } from "@paimaexample/coroutine";
+import type { BaseStfInput } from "@effectstream/sm";
+import type { StartConfigGameStateTransitions } from "@effectstream/runtime";
+import { type SyncStateUpdateStream, World } from "@effectstream/coroutine";
 import {
   completeRace,
   createRace,
@@ -18,13 +18,13 @@ import {
   updateGameMatchesDelegateTo,
   upsertDelegation,
 } from "@kart-legends/database";
-import type { INewScheduledHeightDataParams } from "@paimaexample/db";
-import { newScheduledHeightData } from "@paimaexample/db";
-import type { WalletAddress } from "@paimaexample/utils";
-import { AddressType } from "@paimaexample/utils";
+import type { INewScheduledHeightDataParams } from "@effectstream/db";
+import { newScheduledHeightData } from "@effectstream/db";
+import type { WalletAddress } from "@effectstream/utils";
+import { AddressType } from "@effectstream/utils";
 import { type PlayerConfig, runSimulation } from "@kart-legends/game-simulation";
 
-const stm = new PaimaSTM<typeof grammar, any>(grammar);
+const stm = new Stm<typeof grammar, any>(grammar);
 
 function calculatePrize(numSafes: number, round: number): number {
   const prizes = [0.33, 0.22, 0.16, 0.13, 0.11];

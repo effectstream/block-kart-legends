@@ -1,0 +1,13 @@
+{
+  "name": "@kart-legends/game-simulation",
+  "version": "0.3.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./src/mod.ts",
+  "scripts": {
+    "dryRun": "DRY_RUN=true bun run ./src/runSimulation.ts"
+  },
+  "dependencies": {
+    "three": "^0.182.0"
+  }
+}
