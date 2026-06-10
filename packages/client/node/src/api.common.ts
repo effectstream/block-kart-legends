@@ -1,5 +1,5 @@
 import { type Static, Type } from "@sinclair/typebox";
-import { runPreparedQuery } from "@paimaexample/db";
+import { runPreparedQuery } from "@effectstream/db";
 import {
   getAchievementsWithCompletionCount,
   getDelegatedFromAddresses,
@@ -11,12 +11,12 @@ import {
   getUserStatsByResolvedAddress,
 } from "@kart-legends/database";
 import type { Pool } from "pg";
-import type fastify from "fastify";
+import type { FastifyInstance } from "fastify";
 
 const CHANNEL_ID = "leaderboard";
 
 export const apiCommon = async (
-  server: fastify.FastifyInstance,
+  server: FastifyInstance,
   dbConn: Pool
 ): Promise<void> => {
   await Promise.resolve();

@@ -1,0 +1,36 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@effectstream/concise": ["./types/effectstream/concise.d.ts"],
+      "@effectstream/config": ["./types/effectstream/config.d.ts"],
+      "@effectstream/coroutine": ["./types/effectstream/coroutine.d.ts"],
+      "@effectstream/db": ["./types/effectstream/db.d.ts"],
+      "@effectstream/db/version": ["./types/effectstream/db-version.d.ts"],
+      "@effectstream/runtime": ["./types/effectstream/runtime.d.ts"],
+      "@effectstream/sm": ["./types/effectstream/sm.d.ts"],
+      "@effectstream/sm/builtin": ["./types/effectstream/sm-builtin.d.ts"],
+      "@effectstream/sm/grammar": ["./types/effectstream/sm-grammar.d.ts"],
+      "@effectstream/utils": ["./types/effectstream/utils.d.ts"],
+      "@effectstream/midnight-contracts/read-contract": ["./types/effectstream/midnight-read-contract.d.ts"],
+      "@effectstream/midnight-contracts/midnight-env": ["./types/effectstream/midnight-env.d.ts"],
+      "@kart-legends/data-types/config-dev": ["../../shared/data-types/src/config.dev.ts"],
+      "@kart-legends/data-types/config-preprod": ["../../shared/data-types/src/config.preprod.ts"],
+      "@kart-legends/data-types/config-mainnet": ["../../shared/data-types/src/config.mainnet.ts"],
+      "@kart-legends/data-types/grammar": ["../../shared/data-types/src/grammar.ts"],
+      "@kart-legends/data-types/validate-env": ["../../shared/data-types/src/validate-env.ts"],
+      "@kart-legends/database": ["../database/src/mod.ts"],
+      "@kart-legends/evm-contracts": ["../../shared/contracts/evm-contracts/mod.ts"],
+      "@kart-legends/midnight-contract-midnight-data/contract": ["../../shared/contracts/midnight-contracts/contract-midnight-data/src/managed/midnight-data/contract/index.js"],
+      "@kart-legends/game-simulation": ["./types/kart-legends/game-simulation.d.ts"]
+    }
+  },
+  "include": [
+    "src/main.dev.ts",
+    "src/main.preprod.ts",
+    "src/main.mainnet.ts",
+    "types/**/*.d.ts"
+  ]
+}

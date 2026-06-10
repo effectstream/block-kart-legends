@@ -1,0 +1,26 @@
+{
+  "name": "@kart-legends/batcher",
+  "version": "0.3.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "bun run src/main.ts"
+  },
+  "dependencies": {
+    "@effectstream/batcher-sdk": "0.100.20",
+    "@effectstream/concise": "0.100.20",
+    "@effectstream/coroutine": "0.100.20",
+    "@effectstream/crypto": "0.100.20",
+    "@effectstream/midnight-contracts": "0.100.20",
+    "@effectstream/utils": "0.100.20",
+    "@kart-legends/data-types": "workspace:*",
+    "@kart-legends/evm-contracts": "workspace:*",
+    "@kart-legends/midnight-contract-midnight-data": "workspace:*",
+    "@midnight-ntwrk/compact-runtime": "0.15.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0",
+    "effection": "^3.5.0",
+    "viem": "2.37.3"
+  }
+}

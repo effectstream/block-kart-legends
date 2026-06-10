@@ -1,13 +1,13 @@
 import {
   deployMidnightContract,
-} from "@paimaexample/midnight-contracts/deploy";
-import type { DeployConfig } from "@paimaexample/midnight-contracts/types";
+} from "@effectstream/midnight-contracts/deploy";
+import type { DeployConfig } from "@effectstream/midnight-contracts/types";
 
 import {
   midnight_data,
   witnesses as midnightDataWitnesses,
 } from "./contract-midnight-data/src/index.original.ts";
-import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
+import { midnightNetworkConfig } from "@effectstream/midnight-contracts/midnight-env";
 
 const configs: DeployConfig[] = [
   {
@@ -26,12 +26,12 @@ const configs: DeployConfig[] = [
 const network = { ...midnightNetworkConfig };
 let seed: { seed: string; mnemonic: string };
 if (midnightNetworkConfig.id === 'mainnet') {
-   const node = Deno.env.get("MIDNIGHT_NODE_URL") as string;
+   const node = process.env.MIDNIGHT_NODE_URL as string;
    if (!node) {
     throw new Error("MIDNIGHT_NODE_URL is not set");
    }
    network.node = node;
-   seed = { seed: Deno.env.get("MIDNIGHT_WALLET_SEED") as string, mnemonic: Deno.env.get("MIDNIGHT_WALLET_MNEMONIC") as string };
+   seed = { seed: process.env.MIDNIGHT_WALLET_SEED as string, mnemonic: process.env.MIDNIGHT_WALLET_MNEMONIC as string };
    if (!seed.seed) {
     throw new Error("MIDNIGHT_WALLET_SEED is not set");
    }
@@ -48,9 +48,9 @@ const start = async () => {
 start()
   .then(() => {
     console.log("Deployment successful");
-    Deno.exit(0);
+    process.exit(0);
   })
   .catch((e: unknown) => {
     console.error("Unhandled error:", e);
-    Deno.exit(1);
+    process.exit(1);
   });

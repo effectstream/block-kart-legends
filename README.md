@@ -11,22 +11,21 @@ And serves as a template for building on-chain games.
 > It contains custom contracts, but normally you would not need to modify them.
 
 To start you must have some dependencies installed.
-- [Deno](https://docs.deno.com/runtime/getting_started/installation/)
-- [Node.js](https://nodejs.org/en/download/)
-- [Compact 0.27.0](https://docs.midnight.network/getting-started/installation)
+- [Bun](https://bun.sh/)
+- [Compact 0.30.0](https://docs.midnight.network/getting-started/installation)
 - [Forge](https://getfoundry.sh/introduction/installation)
 
 # Quick Start
 ```sh
 # Install packages
-deno install --allow-scripts && ./patch.sh
+bun install
 
 # Compile contracts
-deno task build:evm
-deno task build:midnight
+bun run build:evm
+bun run build:midnight
 
-# Launch Paima Engine Node
-deno task dev
+# Launch EffectStream stack (node, batcher, frontend, local chains)
+bun run dev
 
 # Now you are ready to play!
 ```
@@ -87,7 +86,7 @@ Once the schema is modified:
 
 Once these files are modified, you can update the database you can create TypeScript bindings for the database queries:
 ```sh
-deno task -f @kart-legends/database pgtyped:update
+bun run --filter @kart-legends/database pgtyped:update
 ```
 
 #### API Endpoints
@@ -120,11 +119,11 @@ cd packages/shared/contracts/evm-contracts
 # edit hardhat.config.ts network section with your settings, wallet with funds and RPC URL
 
 # Then deploy the contract to the testnet
-deno task deploy:testnet
+bun run --filter @kart-legends/evm-contracts deploy:testnet
 ```
 
 Now you can run the game on testnet:
 ```sh
-deno task testnet
+bun run preprod
 ```
 

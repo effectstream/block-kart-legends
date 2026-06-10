@@ -1,6 +1,6 @@
 import "./validate-env.ts";
 import { main, suspend } from "effection";
-import { createNewBatcher, MidnightAdapter } from "@paimaexample/batcher";
+import { createNewBatcher, MidnightAdapter } from "@effectstream/batcher-sdk";
 import { config, storage } from "./config.ts";
 import * as midnightAdapters from "./adapter-midnight.ts";
 import { effectstreaml2Adapter } from "./adapter-effectstreaml2.ts";

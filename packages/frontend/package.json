@@ -1,34 +1,39 @@
 {
-  "name": "block-kart-legends",
+  "name": "block-kart-legends-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --mode undeployed",
-    "build:undeployed": "tsc && vite build --mode undeployed",
-    "build:testnet": "tsc && vite build --mode testnet",
-    "build:mainnet": "tsc && vite build --mode mainnet",
-    "preprod": "vite preprod",
-    "mainnet": "vite mainnet",
-    "serve": "npx http-server ./dist"
+    "dev": "bunx vite --port 3000 --mode undeployed",
+    "build:undeployed": "bunx vite build --mode undeployed",
+    "build:testnet": "bunx vite build --mode testnet",
+    "build:mainnet": "bunx vite build --mode mainnet",
+    "preprod": "bunx vite preprod",
+    "mainnet": "bunx vite mainnet",
+    "serve": "bunx http-server ./dist"
   },
   "devDependencies": {
+    "memfs": "^4.17.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
     "vite-plugin-glsl": "^1.5.5",
-    "vite-plugin-node-polyfills": "^0.24.0"
+    "vite-plugin-node-stdlib-browser": "^0.2.1",
+    "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
+    "@effectstream/wallets": "0.100.20",
+    "@effect/platform": "0.96.1",
     "@midnight-ntwrk/dapp-connector-api": "4.0.1",
-    "@paimaexample/wallets": "0.11.3",
     "@sentry/browser": "^10.47.0",
     "@thirdweb-dev/chains": "^0.1.120",
     "@thirdweb-dev/wallets": "^2.5.39",
     "@tweenjs/tween.js": "^25.0.0",
     "@types/three": "^0.182.0",
     "ethers": "^5.8.0",
+    "effect": "^3.21.2",
+    "http-server": "^14.1.1",
     "three": "^0.182.0",
-    "viem": "^2.42.1"
+    "viem": "2.37.3"
   }
 }

@@ -1,4 +1,4 @@
-import { PaimaEngineConfig } from "@paimaexample/wallets";
+import { EffectstreamConfig } from "@effectstream/wallets";
 import { hardhat, arbitrum, arbitrumSepolia } from "viem/chains";
 
 const chains: Record<string, any> = {
@@ -17,16 +17,14 @@ const chainName = import.meta.env.VITE_CHAIN;
 const chain = chains[chainName];
 
 const syncProtocolName = "mainEvmRPC";
-const appName = "";
 const useBatching = true;
 
-// Configuration
-export const EngineConfig = new PaimaEngineConfig(
-  appName,                 // app name
-  syncProtocolName,        // sync protocol name
-  ENV.L2_CONTRACT_ADDRESS, // L2 contract address
-  chain,                   // l2 chain
-  undefined,               // use default abi
-  ENV.BATCHER_URL,         // batcher url
-  useBatching              // use batching
+export const EngineConfig = new EffectstreamConfig(
+  undefined,
+  syncProtocolName,
+  ENV.L2_CONTRACT_ADDRESS,
+  chain,
+  undefined,
+  ENV.BATCHER_URL,
+  useBatching
 );

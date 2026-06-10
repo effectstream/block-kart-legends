@@ -1,17 +1,17 @@
 import { contractAddressesEvmMain } from "@kart-legends/evm-contracts";
-import { readMidnightContract } from "@paimaexample/midnight-contracts/read-contract";
+import { readMidnightContract } from "@effectstream/midnight-contracts/read-contract";
 import * as midnightDataContract from "@kart-legends/midnight-contract-midnight-data/contract";
 
 import {
   ConfigBuilder,
   ConfigNetworkType,
   ConfigSyncProtocolType,
-} from "@paimaexample/config";
+} from "@effectstream/config";
 import { hardhat } from "viem/chains";
-import { getConnection } from "@paimaexample/db";
-import { midnightNetworkConfig } from "@paimaexample/midnight-contracts/midnight-env";
+import { getConnection } from "@effectstream/db";
+import { midnightNetworkConfig } from "@effectstream/midnight-contracts/midnight-env";
 
-import * as builtin from "@paimaexample/sm/builtin";
+import * as builtin from "@effectstream/sm/builtin";
 
 import path from "node:path";
 
@@ -118,7 +118,7 @@ export const config = new ConfigBuilder()
         (syncProtocols) => syncProtocols.mainEvmRPC,
         (network, deployments, syncProtocol) => ({
           name: "primitive_effectstreaml2",
-          type: builtin.PrimitiveTypeEVMPaimaL2,
+          type: builtin.PrimitiveTypeEVMEffectstreamL2,
           startBlockHeight: 0,
           contractAddress:
             contractAddressesEvmMain().chain31337[

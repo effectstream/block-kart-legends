@@ -4,7 +4,7 @@ import {
   WalletMode,
   WalletNameMap,
   // LoginOptions,
-} from "@paimaexample/wallets";
+} from "@effectstream/wallets";
 import { hardhat, arbitrumSepolia } from "viem/chains";
 import { LocalWallet } from "@thirdweb-dev/wallets";
 import { getChainByChainIdAsync } from "@thirdweb-dev/chains";
@@ -52,7 +52,7 @@ export async function initializeLocalWallet() {
   if (localWallet) return localWallet;
 
   async function _getLocalWallet() {
-    const chain = await getChainByChainIdAsync(EngineConfig.paimaL2Chain.id);
+    const chain = await getChainByChainIdAsync(EngineConfig.effectstreamL2Chain.id);
     const wallet = new LocalWallet({ chain });
     await wallet.loadOrCreate({
       strategy: "encryptedJson",

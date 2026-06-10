@@ -5,13 +5,32 @@ export interface EnvVarSpec {
   defaultValue?: string;
 }
 
+function getEnvVar(name: string): string | undefined {
+  if (typeof process !== "undefined" && process.env) {
+    return process.env[name];
+  }
+  const deno = (globalThis as { Deno?: { env: { get(name: string): string | undefined } } }).Deno;
+  return deno?.env.get(name);
+}
+
+function exit(code: number): never {
+  if (typeof process !== "undefined" && process.exit) {
+    process.exit(code);
+  }
+  const deno = (globalThis as { Deno?: { exit(code: number): never } }).Deno;
+  if (deno) {
+    deno.exit(code);
+  }
+  throw new Error(`exit ${code}`);
+}
+
 export function validateEnv(programName: string, specs: EnvVarSpec[]): void {
   const maxNameLen = Math.max(...specs.map((s) => s.name.length));
   const rows: string[] = [];
   const missing: string[] = [];
 
   for (const spec of specs) {
-    const raw = Deno.env.get(spec.name);
+    const raw = getEnvVar(spec.name);
     let status: string;
     let display: string;
     let tag = "";
@@ -26,6 +45,12 @@ export function validateEnv(programName: string, specs: EnvVarSpec[]): void {
     } else if (spec.defaultValue != null) {
       status = "DEFAULT";
       display = spec.secret ? "****" : spec.defaultValue;
+      if (typeof process !== "undefined" && process.env) {
+        process.env[spec.name] ??= spec.defaultValue;
+      } else {
+        const deno = (globalThis as { Deno?: { env: { set(name: string, value: string): void } } }).Deno;
+        deno?.env.set(spec.name, spec.defaultValue);
+      }
     } else {
       status = "MISSING";
       display = "(not set)";
@@ -55,7 +80,7 @@ export function validateEnv(programName: string, specs: EnvVarSpec[]): void {
       console.error(`  - ${name}`);
     }
     console.error("Exiting.");
-    Deno.exit(1);
+    exit(1);
   }
 
   console.log("All required environment variables are set.\n");
