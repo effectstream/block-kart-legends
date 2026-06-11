@@ -30,7 +30,7 @@ if (midnightNetworkConfig.id !== 'mainnet') {
 }
 
 export const config = new ConfigBuilder()
-  .setNamespace((builder) => builder.setSecurityNamespace("[scope]"))
+  .setNamespace((builder) => builder.setSecurityNamespace("evm-midnight-node"))
   .buildNetworks((builder) =>
     builder
       .addNetwork({

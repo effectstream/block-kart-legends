@@ -35,6 +35,24 @@ const evmMainPort = 8545;
 const evmMainChainId = 31337;
 const evmMainInterval = 1000;
 
+// Deploy credentials are read from the environment so no secrets live in source.
+// Falls back to harmless placeholders for dev/compile-only runs.
+const ZERO_KEY =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
+const withHexPrefix = (k?: string) =>
+  !k ? undefined : k.startsWith("0x") ? k : `0x${k}`;
+const deployKey =
+  withHexPrefix(
+    process.env.DEPLOYER_PRIVATE_KEY ?? process.env.BATCHER_EVM_SECRET_KEY,
+  ) ?? ZERO_KEY;
+const arbitrumUrl =
+  process.env.ARBITRUM_ONE_FULL ??
+  process.env.ARBITRUM_ONE_RPC_URL ??
+  "https://arb-mainnet.g.alchemy.com/v2/API-KEY";
+const arbitrumSepoliaUrl =
+  process.env.ARBITRUM_SEPOLIA_RPC_URL ??
+  "https://arb-sepolia.g.alchemy.com/v2/API-KEY";
+
 // Create unified config with default networks
 const config: HardhatUserConfig = createHardhatConfig({
   sourcesDir: `${__dirname}/src/contracts`,
@@ -46,17 +64,21 @@ const config: HardhatUserConfig = createHardhatConfig({
     // This is needed to set once, to deploy contracts in testnet:
     // deno task -f @kart-legends/evm-contracts deploy:testnet
     // deno task -f @kart-legends/evm-contracts build:mod
+    // Deploy: set ARBITRUM_SEPOLIA_RPC_URL + DEPLOYER_PRIVATE_KEY (or
+    // BATCHER_EVM_SECRET_KEY) in the env, then `bun run deploy:testnet`.
     arbitrumSepolia: {
       type: "http",
       chainId: 421614,
-      url: "https://arb-sepolia.g.alchemy.com/v2/API-KEY", // Replace with your RPC URL
-      accounts: ["0000000000000000000000000000000000000000000000000000000000000000"], // Private key with funds to deploy contracts.
+      url: arbitrumSepoliaUrl,
+      accounts: [deployKey],
     },
+    // Deploy: set ARBITRUM_ONE_FULL + DEPLOYER_PRIVATE_KEY (or
+    // BATCHER_EVM_SECRET_KEY) in the env, then `bun run deploy:mainnet`.
     arbitrum: {
       type: 'http',
       chainId: 42161,
-      url: 'https://arb-mainnet.g.alchemy.com/v2/API-KEY',
-      accounts: ['0000000000000000000000000000000000000000000000000000000000000000'],
+      url: arbitrumUrl,
+      accounts: [deployKey],
     },
 
     // These are development networks.

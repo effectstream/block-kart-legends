@@ -19,8 +19,15 @@ const chain = chains[chainName];
 const syncProtocolName = "mainEvmRPC";
 const useBatching = true;
 
+// Security-namespace prefix the wallet signs into every batched message. MUST
+// match the batcher's BatcherConfig.namespace and the node's
+// setSecurityNamespace(...) in packages/shared/data-types/src/config*.ts —
+// otherwise the node re-verifies the on-chain batch with a different namespace
+// and rejects every input as "Invalid signature".
+const securityNamespace = "evm-midnight-node";
+
 export const EngineConfig = new EffectstreamConfig(
-  undefined,
+  securityNamespace,
   syncProtocolName,
   ENV.L2_CONTRACT_ADDRESS,
   chain,
