@@ -22,7 +22,7 @@
     "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
-    "@effectstream/wallets": "0.100.20",
+    "@effectstream/wallets": "0.100.23",
     "@effect/platform": "0.96.1",
     "@midnight-ntwrk/dapp-connector-api": "4.0.1",
     "@sentry/browser": "^10.47.0",
