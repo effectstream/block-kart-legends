@@ -638,8 +638,10 @@ export class GameSimulator {
     // This ensures time is always exactly updateCallCount * FIXED_STEP, preventing floating point drift
     this.time = this.updateCallCount * this.FIXED_STEP;
     
-    // Store snapshot after every update for step-by-step comparison
-    this.stepSnapshots.push(this.getSnapshot());
+    // Debug-only: ~36k snapshots/race leaks the heap on the node, which never reads them.
+    if (this.enableDebugLogs) {
+      this.stepSnapshots.push(this.getSnapshot());
+    }
   }
 
   public getSnapshot(): GameSnapshot {
