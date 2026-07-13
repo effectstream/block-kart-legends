@@ -11,12 +11,12 @@
     "./validate-env": "./src/validate-env.ts"
   },
   "dependencies": {
-    "@effectstream/concise": "0.100.28",
-    "@effectstream/config": "0.100.28",
-    "@effectstream/db": "0.100.28",
-    "@effectstream/midnight-contracts": "0.100.28",
-    "@effectstream/sm": "0.100.28",
-    "@effectstream/utils": "0.100.28",
+    "@effectstream/concise": "0.101.1",
+    "@effectstream/config": "0.101.1",
+    "@effectstream/db": "0.101.1",
+    "@effectstream/midnight-contracts": "0.101.1",
+    "@effectstream/sm": "0.101.1",
+    "@effectstream/utils": "0.101.1",
     "@kart-legends/evm-contracts": "workspace:*",
     "@kart-legends/midnight-contract-midnight-data": "workspace:*",
     "@sinclair/typebox": "0.34.41",
